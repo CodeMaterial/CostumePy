@@ -9,9 +9,12 @@ class CostumeModule(Process):
         self.refresh_rate = refresh_rate
         self.running = True
         self.next_loop = None
+
         self.send_queue = None
         self.receive_queue = None
+
         self.name = self.__class__.__name__
+
         self.listeners = {"SHUTDOWN": self.shutdown}  # This could be {"NOSE_PRESS":self.nose_press)}
 
         logging.info("Initialised")
@@ -19,7 +22,7 @@ class CostumeModule(Process):
     def __repr__(self):
         return "Costume Module: %s" % self.name
 
-    def shutdown(self):
+    def shutdown(self, event):
         logging.info("Shutting down")
         self.running = False
 
@@ -33,18 +36,23 @@ class CostumeModule(Process):
         logging.debug("Broadcasting %r" % event)
         self.send_queue.put(event)
 
+    def execute_queue(self):
+        if not self.receive_queue.empty():
+            event = self.receive_queue.get()
+            if event.name in self.listeners:
+                self.listeners[event.name](event)
+            else:
+                logging.error("%r doesn't have any handles" % event)
+
     def run(self):
         logging.info("Starting idle")
-        while self.pause():
-            if not self.receive_queue.empty():
-                event = self.receive_queue.get()
-                if event.name in self.listeners:
-                    self.listeners[event.name](event)
-                else:
-                    logging.error("%r doesn't have any handles" % event)
+        
+        while self.run_at_frame_rate():
+            self.execute_queue()
+        
         logging.info("Finished idle")
 
-    def pause(self):
+    def run_at_frame_rate(self):
 
         if not self.next_loop:
             self.next_loop = time.time() + self.refresh_rate
