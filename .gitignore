@@ -2,3 +2,7 @@
 __pycache__
 *.pyc
 test_*.py
+temp.*
+NOTES.txt
+
+config

@@ -14,7 +14,7 @@ class Event(object):
     def __repr__(self):
         delay = self.action_at - self.created
         return "<%s - {source: %r, name:%r, data:%r, created:%r, delay:%r}>" % \
-               (self.__class__.__name__, self.source, self.name, self.data, self.created, delay)
+               (self.__class__.__name__, self.source, self.name, self.data, self.created, delay if delay else "None")
 
 
 class DelayedEvent(Event):

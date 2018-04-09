@@ -1,62 +1,87 @@
-import time
-import multiprocessing
 import logging
+from multiprocessing import Process, Queue
+import time
 
-from system.costume_modules import CostumeModule
 
 
-class EventManager(multiprocessing.Process):
+class EventManager(Process):
 
     def __init__(self):
         super().__init__()
         self.modules = []
-        self.event_queue = multiprocessing.Queue()
-        self.listeners = {}
+        self.listeners = {}  # {event_id:[module_id, module_id]}
 
-        logging.info("Event Manager instantiated")
+        self.module_queues = {}  # {module_id: queue}
+        self.main_queue = Queue()
+
+        self.running = True
+        self.name = self.__class__.__name__
+        logging.debug("%r initialised" % self.name)
 
     def __repr__(self):
-        return "Event Manager"
+        return "<Event Manager>"
 
-    def inject(self, event):
-        self.event_queue.put(event)
-        logging.info("Event Injected: %r" % event)
+    def add_module(self, module_class):
 
-    def add_module(self, module):
-        if isinstance(module, list):
-            for i in module:
-                self.add_module(i)
+        module = module_class()
 
-        if isinstance(module, CostumeModule):
-            module.set_manager(self.event_queue)
-            self.modules.append(module)
+        self.modules.append(module)
 
-        logging.info("%r added to Event Manager" % module)
 
-    def add_listener(self, method, message_id):
-        if message_id in self.listeners:
-            self.listeners[message_id].append(method)
-        else:
-            self.listeners[message_id] = [method]
-            logging.info("%r now listening for %r" % (method, message_id))
+        # Setup queues
+        module_queue = Queue()
+        self.module_queues[module.name] = module_queue
 
-    def run_all(self):
+        module.set_queues(self.main_queue, module_queue)
+
+        # Setup listeners
+        for event_id in module.listeners:
+            if event_id in self.listeners:
+                self.listeners[event_id].append(module.name)
+            else:
+                self.listeners[event_id] = [module.name]
+
+        logging.debug("%r added to manager" % module)
+
+    def start_modules(self):
         for module in self.modules:
-            logging.info("Starting module %r" % module)
+            logging.debug("Starting new process for %r" % module)
             module.start()
 
-    def run(self):
-        logging.info("Starting event management cycle")
-        while True:
-            if not self.event_queue.empty():
-                event = self.event_queue.get()
-                if event.action_at > time.time():
-                    self.event_queue.put(event)
+    def find_queues(self, event):
+
+        queues = []
+
+        if event.name not in self.listeners:
+            logging.error("Cannot find any modules listening to %s" % event.name)
+        else:
+            for module_id in self.listeners[event.name]:
+                if module_id in self.module_queues:
+                    queues.append(self.module_queues[module_id])
                 else:
-                    if event.name in self.listeners:
-                        methods = self.listeners[event.name]
-                        for method in methods:
-                            try:
-                                method(event)
-                            except Exception as e:
-                                logging.error("Method %r failed to handle event %r: %r" % (method, event, str(e)))
+                    logging.error("Cannot find associated pipe for %s" % module_id)
+
+        return queues
+
+    def inject(self, event):
+        event.source = "inject"
+        logging.debug("Injecting event %r" % event)
+        for queue in self.find_queues(event):
+            queue.put(event)
+
+    def run(self):  # This method should be accessed via the start() method only
+
+        logging.debug("Starting event management cycle")
+        while self.running:
+            if not self.main_queue.empty():
+                event = self.main_queue.get()
+
+                if event.action_at > time.time():
+                    self.main_queue.put(event)
+                else:
+                    queues = self.find_queues(event)
+                    logging.debug("Sending: %r to %r" % (event, queues))
+                    for queue in queues:
+                        queue.put(event)
+
+        logging.info("end ")

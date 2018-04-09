@@ -1,44 +1,59 @@
-import multiprocessing
+from multiprocessing import Process
 import time
 import logging
 
-
-class CostumeModule(multiprocessing.Process):
+class CostumeModule(Process):
 
     def __init__(self, refresh_rate):
         super().__init__()
-        self.event_queue = None
         self.refresh_rate = refresh_rate
         self.running = True
-        self.next_loop = time.time() + refresh_rate
+        self.next_loop = None
+        self.send_queue = None
+        self.receive_queue = None
+        self.name = self.__class__.__name__
+        self.listeners = {"SHUTDOWN": self.shutdown}  # This could be {"NOSE_PRESS":self.nose_press)}
 
-        logging.info("CostumeModule instantiated")
+        logging.info("Initialised")
 
     def __repr__(self):
-        return "Costume Module: %s" % self.__class__.__name__
+        return "Costume Module: %s" % self.name
 
-    def broadcast(self, event):
-        event.source = self.__class__
-        self.event_queue.put(event)
-        logging.info("Event broadcast: %r" % event)
-
-    def set_manager(self, event_queue):
-        self.event_queue = event_queue
-
-    def stop(self):
+    def shutdown(self):
+        logging.info("Shutting down")
         self.running = False
 
-    def run(self):
-        while self.running:
-            self.run_at_frame_rate()
+    def set_queues(self, manager_queue, module_queue):
+        logging.debug("Setting queues")
+        self.send_queue = manager_queue
+        self.receive_queue = module_queue
 
-    def run_at_frame_rate(self):
+    def broadcast(self, event):
+        event.source = self.name
+        logging.debug("Broadcasting %r" % event)
+        self.send_queue.put(event)
+
+    def run(self):
+        logging.info("Starting idle")
+        while self.pause():
+            if not self.receive_queue.empty():
+                event = self.receive_queue.get()
+                if event.name in self.listeners:
+                    self.listeners[event.name](event)
+                else:
+                    logging.error("%r doesn't have any handles" % event)
+        logging.info("Finished idle")
+
+    def pause(self):
+
+        if not self.next_loop:
+            self.next_loop = time.time() + self.refresh_rate
 
         time_to_sleep = self.next_loop - time.time()
         if time_to_sleep > 0:
             time.sleep(self.refresh_rate)
         else:
-            logging.error("Overunning")
+            logging.error("Overrunning")
 
         self.next_loop = time.time() + self.refresh_rate
 
