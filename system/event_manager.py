@@ -1,16 +1,17 @@
 import logging
-from multiprocessing import Process, Queue
 import time
+from multiprocessing import Process, Queue
 
 from system.events import Event
+
 
 class EventManager(Process):
 
     def __init__(self):
         super().__init__()
         self.modules = {}
-        self.listeners = {}  # {event_id:[module_id, module_id]}
-        self.own_listeners = {"SHUTDOWN": self.shutdown}
+        self.listeners = {}
+        self.own_listeners = {"SHUTDOWN": self.shutdown, "LIST_MODULES": self.list_modules}
 
         self.module_queues = {}  # {module_id: queue}
         self.main_queue = Queue()
@@ -22,12 +23,14 @@ class EventManager(Process):
     def __repr__(self):
         return "<Event Manager>"
 
+    def list_modules(self, event):
+        self.broadcast("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
+
     def add_module(self, module_class):
 
         module = module_class()
 
         self.modules[module.name] = module
-
 
         # Setup queues
         module_queue = Queue()
@@ -46,18 +49,17 @@ class EventManager(Process):
 
     def start_modules(self):
         for module_name in self.modules:
+
             logging.debug("Starting new process for %r" % module_name)
             module = self.modules[module_name]
             module.start()
 
-    def shutdown(self, event): # can only be run if the manager is running in the main process
-        shutdown_event = Event("SHUTDOWN",True)
+    def shutdown(self, event):
+
+        shutdown_event = Event("SHUTDOWN")
         for module_name in self.module_queues:
-            logging.info("Shutting down %s"%module_name)
             self.module_queues[module_name].put(shutdown_event)
-            logging.info("Joining %s"%module_name)
             self.modules[module_name].join()
-            logging.info("%s Joined"%module_name)
 
         logging.info("All modules joined")
         self.running = False
@@ -77,16 +79,15 @@ class EventManager(Process):
 
         return queues
 
-    def inject(self, event):
-        event.source = "inject"
-        logging.debug("Injecting event %r" % event)
+    def broadcast(self, message_id, data=None, delay=0):
+        event = Event(message_id, data=data, delay=delay,source=self.name)
+        logging.debug("Broadcasting event %r" % event)
         for queue in self.find_queues(event):
             queue.put(event)
 
     """ This method should be called directly in the main process but can be called as a process using start()
         If using start() then shutdown() needs to be called explicitly in the main process to cleanup the modules"""
     def run(self):
-
 
         logging.debug("Starting event management cycle")
         while self.running:
@@ -104,4 +105,4 @@ class EventManager(Process):
                         for queue in queues:
                             queue.put(event)
 
-        logging.info("end")
+        logging.info("Complete event management cycle")
