@@ -11,7 +11,7 @@ class EventManager(Process):
         super().__init__()
         self.modules = {}
         self.listeners = {}
-        self.own_listeners = {"SHUTDOWN": self.shutdown, "LIST_MODULES": self.list_modules}
+        self.own_listeners = {"SHUTDOWN": self.shutdown}
 
         self.module_queues = {}  # {module_id: queue}
         self.main_queue = Queue()
@@ -27,6 +27,12 @@ class EventManager(Process):
         self.broadcast("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
 
     def add_module(self, module_class):
+
+        passed_testing = self.test_module(module_class)
+
+        if not passed_testing:
+            print("Module failed to pass test criteria. Dropping")
+            return
 
         module = module_class()
 
@@ -46,6 +52,22 @@ class EventManager(Process):
                 self.listeners[event_id] = [module.name]
 
         logging.debug("%r added to manager" % module)
+
+    def test_module(self, module):
+        logging.debug("Testing module %s" % module.__name__)
+
+        try:
+            exec("from tests.unit.%s_test import %sTest" % (module.__name__.lower(), module.__name__))
+        except ImportError:
+            print("Cannot load %sTest, does it exist?" % module.__name__)
+            return True
+
+        test_class = eval("%sTest" % module.__name__)
+        test = test_class()
+        test.run_tests()
+        passed = test.has_passed()
+        del test
+        return passed
 
     def start_modules(self):
         for module_name in self.modules:

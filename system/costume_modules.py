@@ -20,7 +20,7 @@ class CostumeModule(Process):
         self.receive_queue = None
 
         self.listeners = {"SHUTDOWN": self.shutdown,
-                          "UI_REQUEST": self.ui_request,
+                          "HEARTBEAT_REQUEST": self.heartbeat_request,
                           "MEASURE_REFRESH": self.measure_refresh}
         self.actions = {}
 
@@ -32,8 +32,12 @@ class CostumeModule(Process):
     def __repr__(self):
         return "Costume Module: %s" % self.name
 
+    def heartbeat_request(self, event):
+        self.broadcast("HEARTBEAT")
+
     def shutdown(self, event):
         logging.info("Shutting down")
+        self.broadcast("DEATH")
         self.running = False
 
     def setup(self):
@@ -51,9 +55,6 @@ class CostumeModule(Process):
             rate = time_sum/(self.refresh_times_limit-1)
 
         self.broadcast("REFRESH_RATE", data=rate)
-
-    def ui_request(self, event):
-        self.broadcast("UI", {"descr": self.description, "actions": self.actions})
 
     def set_queues(self, manager_queue, module_queue):
         logging.debug("Setting queues")
