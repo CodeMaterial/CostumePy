@@ -10,10 +10,10 @@ class ButtonTest(UnitTest):
 
     def test_blush(self):
 
-        self.send_queue.put(Event("NOSE_PRESS", data=True))
+        self.send_input(Event("NOSE_PRESS", data=True))
         self.check_output(Event("BLUSH", data=True))
 
     def test_blush_shutdown(self):
 
-        self.send_queue.put(Event("NOSE_PRESS", data=True))
+        self.send_input(Event("NOSE_PRESS", data=True))
         self.check_output(Event("BLUSH", data=False, delay=5))

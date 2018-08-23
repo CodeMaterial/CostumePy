@@ -15,13 +15,16 @@ class UnitTest:
         self.module_class = module_class
         self.module = None
 
+    def send_input(self, event):
+        self.send_queue.put(event)
+
     def run_tests(self):
         try:
             self.module = self.module_class()
             self.module.set_queues(self.receive_queue, self.send_queue)
             self.module.start()
         except:
-            print("Cannot initialise module")
+            logging.error("Cannot initialise module")
             self.passed = False
             return
 
@@ -36,7 +39,7 @@ class UnitTest:
                 q.get()
 
     def run_all_tests(self):
-        print("Executing %s" % self.__class__.__name__)
+        logging.info("Executing %s" % self.__class__.__name__)
         for func in dir(self):
             if func.startswith("test_"):
                 self.current_test_name = func
@@ -46,16 +49,15 @@ class UnitTest:
                 try:
                     test_function()
                 except:
-                    print("Test function failed")
+                    logging.error("Test function failed")
                     self.passed = False
                     self.diagnostic[self.current_test_name] += "Test Failure"
 
         self.__test_shutdown()
 
-        print("Module passed!" if self.passed else "Module Failed!")
-        print("Diagnostics:")
+        logging.info("Module passed!" if self.passed else "Module Failed!")
         for item in self.diagnostic:
-            print(item, self.diagnostic[item])
+            logging.info(item + self.diagnostic[item])
 
     def __test_shutdown(self):
 
@@ -64,11 +66,11 @@ class UnitTest:
 
         while time.time() - start_time < 1:
             if not self.module.is_alive():
-                self.diagnostic["test_shutdown"] = "\n\tPassed, Module shutdown in %0.2f seconds" % (time.time() - start_time)
+                self.diagnostic["test_shutdown"] = "Passed, Module shutdown in %0.2f seconds" % (time.time() - start_time)
                 return True
 
         self.passed = False
-        self.diagnostic["__test_shutdown"] = "\n\tFailed, module failed to shutdown, killing"
+        self.diagnostic["__test_shutdown"] = "Failed, module failed to shutdown, killing"
         self.module.terminate()
         return False
 
@@ -80,10 +82,10 @@ class UnitTest:
             if not self.receive_queue.empty():
                 e = self.receive_queue.get()
                 if e == event:
-                    self.diagnostic[self.current_test_name] += "\n\tPassed %s output check" % event
+                    self.diagnostic[self.current_test_name] += "Passed %s output check" % event
                     return
                 else:
                     self.receive_queue.put(e)
 
         self.passed = False
-        self.diagnostic[self.current_test_name] += "\n\tFailed %s output check" % event
+        self.diagnostic[self.current_test_name] += "Failed %s output check" % event

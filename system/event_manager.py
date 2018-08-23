@@ -59,7 +59,7 @@ class EventManager(Process):
         try:
             exec("from tests.unit.%s_test import %sTest" % (module.__name__.lower(), module.__name__))
         except ImportError:
-            print("Cannot load %sTest, does it exist?" % module.__name__)
+            logging.error("Cannot load %sTest, does it exist?" % module.__name__)
             return True
 
         test_class = eval("%sTest" % module.__name__)
