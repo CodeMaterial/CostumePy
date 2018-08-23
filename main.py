@@ -4,7 +4,7 @@ from system.events import Event
 import sys
 import time
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s [%(levelname)-5s] %(module)-20.20s %(processName)-15.15s %(message)s')
 
 if __name__ == "__main__":
@@ -26,5 +26,3 @@ if __name__ == "__main__":
 
     eventManager.start_modules()
     eventManager.start()
-    time.sleep(2)
-    eventManager.main_queue.put(Event("NOSE_PRESS"))

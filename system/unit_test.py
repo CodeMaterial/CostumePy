@@ -39,25 +39,23 @@ class UnitTest:
                 q.get()
 
     def run_all_tests(self):
-        logging.info("Executing %s" % self.__class__.__name__)
         for func in dir(self):
             if func.startswith("test_"):
                 self.current_test_name = func
                 test_function = eval("self.%s" % func)
                 self.diagnostic[self.current_test_name] = ""
                 self.clear_queues()
+
                 try:
                     test_function()
+                    logging.error("%s passed" % func)
                 except:
-                    logging.error("Test function failed")
+                    logging.error("%s failed" % func)
                     self.passed = False
-                    self.diagnostic[self.current_test_name] += "Test Failure"
 
         self.__test_shutdown()
 
-        logging.info("Module passed!" if self.passed else "Module Failed!")
-        for item in self.diagnostic:
-            logging.info(item + self.diagnostic[item])
+        logging.info(self.__class__.__name__ + (" Passed!" if self.passed else " Failed!"))
 
     def __test_shutdown(self):
 
@@ -66,11 +64,11 @@ class UnitTest:
 
         while time.time() - start_time < 1:
             if not self.module.is_alive():
-                self.diagnostic["test_shutdown"] = "Passed, Module shutdown in %0.2f seconds" % (time.time() - start_time)
+                logging.info("test_shutdown Passed, Module shutdown in %0.2f seconds" % (time.time() - start_time))
                 return True
 
         self.passed = False
-        self.diagnostic["__test_shutdown"] = "Failed, module failed to shutdown, killing"
+        logging.info("test_shutdown Failed, module failed to shutdown, killing")
         self.module.terminate()
         return False
 
@@ -82,10 +80,11 @@ class UnitTest:
             if not self.receive_queue.empty():
                 e = self.receive_queue.get()
                 if e == event:
-                    self.diagnostic[self.current_test_name] += "Passed %s output check" % event
+                    logging.debug("Passed %s output check %r" % (self.current_test_name, event))
                     return
                 else:
                     self.receive_queue.put(e)
 
         self.passed = False
-        self.diagnostic[self.current_test_name] += "Failed %s output check" % event
+        logging.info("Failed %s output check %r" % (self.current_test_name, event))
+        assert False

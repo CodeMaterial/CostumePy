@@ -31,7 +31,7 @@ class EventManager(Process):
         passed_testing = self.test_module(module_class)
 
         if not passed_testing:
-            print("Module failed to pass test criteria. Dropping")
+            logging.error("%s failed to pass test criteria. Dropping" % module_class.__name__)
             return
 
         module = module_class()
@@ -54,7 +54,7 @@ class EventManager(Process):
         logging.debug("%r added to manager" % module)
 
     def test_module(self, module):
-        logging.debug("Testing module %s" % module.__name__)
+        logging.info("Testing module %s" % module.__name__)
 
         try:
             exec("from tests.unit.%s_test import %sTest" % (module.__name__.lower(), module.__name__))
