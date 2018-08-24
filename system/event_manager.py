@@ -2,7 +2,7 @@ import logging
 import time
 from multiprocessing import Process, Queue
 
-from system.events import Event
+from CostumePy.system.events import Event
 
 
 class EventManager(Process):
@@ -57,7 +57,7 @@ class EventManager(Process):
         logging.info("Testing module %s" % module.__name__)
 
         try:
-            exec("from tests.unit.%s_test import %sTest" % (module.__name__.lower(), module.__name__))
+            exec("from tests.%s_test import %sTest" % (module.__name__.lower(), module.__name__))
         except ImportError:
             logging.error("Cannot load %sTest, does it exist?" % module.__name__)
             return True
@@ -112,19 +112,24 @@ class EventManager(Process):
     def run(self):
 
         logging.debug("Starting event management cycle")
-        while self.running:
-            if not self.main_queue.empty():
-                event = self.main_queue.get()
 
-                if event.action_at > time.time():
-                    self.main_queue.put(event)
-                else:
-                    if event.name in self.own_listeners:
-                        self.own_listeners[event.name](event)
+        try:
+            while self.running:
+                if not self.main_queue.empty():
+                    event = self.main_queue.get()
+
+                    if event.action_at > time.time():
+                        self.main_queue.put(event)
                     else:
-                        queues = self.find_queues(event)
-                        logging.debug("Sending: %r to %r" % (event, queues))
-                        for queue in queues:
-                            queue.put(event)
+                        if event.name in self.own_listeners:
+                            self.own_listeners[event.name](event)
+                        else:
+                            queues = self.find_queues(event)
+                            logging.debug("Sending: %r to %r" % (event, queues))
+                            for queue in queues:
+                                queue.put(event)
+
+        except KeyboardInterrupt:
+            self.shutdown(None)
 
         logging.info("Complete event management cycle")

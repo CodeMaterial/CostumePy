@@ -1,12 +1,12 @@
 from multiprocessing import Process
 import time
 import logging
-from system.events import Event
+from CostumePy.system.events import Event
 
 
 class CostumeModule(Process):
 
-    def __init__(self, refresh_rate=1):
+    def __init__(self, refresh_rate=1/30):
         super().__init__()
         self.refresh_rate = refresh_rate
         self.name = self.__class__.__name__
@@ -76,10 +76,14 @@ class CostumeModule(Process):
 
     def run(self):
         logging.info("Starting idle")
-        
-        while self.run_at_frame_rate():
+
+        try:
+            while self.run_at_frame_rate():
+                pass
+        except KeyboardInterrupt:
+            self.shutdown(None)
             pass
-        
+
         logging.info("Finished idle")
 
     def run_at_frame_rate(self):
