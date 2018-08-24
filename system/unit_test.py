@@ -6,7 +6,7 @@ from multiprocessing import Queue
 
 class UnitTest:
 
-    def __init__(self, module_class):
+    def __init__(self, module_class, timeout=1):
         self.current_test_name = ""
         self.passed = True
         self.diagnostic = {}
@@ -14,8 +14,13 @@ class UnitTest:
         self.receive_queue = Queue()
         self.module_class = module_class
         self.module = None
+        self.timeout = timeout
 
-    def send_input(self, event):
+    def send_input(self, event, data=None, delay=0, source=None):
+
+        if not isinstance(event, Event):
+            event = Event(event, data=data, delay=delay, source=source)
+
         self.send_queue.put(event)
 
     def run_tests(self):
@@ -34,6 +39,7 @@ class UnitTest:
         return self.passed
 
     def clear_queues(self):
+        logging.info("Clearing queues")
         for q in [self.send_queue, self.receive_queue]:
             while not q.empty():
                 q.get()
@@ -46,9 +52,10 @@ class UnitTest:
                 self.diagnostic[self.current_test_name] = ""
                 self.clear_queues()
 
+                logging.info("testing %s..." % func)
                 try:
                     test_function()
-                    logging.error("%s passed" % func)
+                    logging.info("%s passed" % func)
                 except:
                     logging.error("%s failed" % func)
                     self.passed = False
@@ -62,7 +69,7 @@ class UnitTest:
         self.send_queue.put(Event("SHUTDOWN"))
         start_time = time.time()
 
-        while time.time() - start_time < 1:
+        while time.time() - start_time < self.timeout:
             if not self.module.is_alive():
                 logging.info("test_shutdown Passed, Module shutdown in %0.2f seconds" % (time.time() - start_time))
                 return True
@@ -72,11 +79,14 @@ class UnitTest:
         self.module.terminate()
         return False
 
-    def check_output(self, event):
+    def check_output(self, event, data=None, delay=0, source=None):
+
+        if not isinstance(event, Event):
+            event = Event(event, data=data, delay=delay, source=source)
 
         start_time = time.time()
 
-        while time.time() - start_time < 1:
+        while time.time() - start_time < self.timeout:
             if not self.receive_queue.empty():
                 e = self.receive_queue.get()
                 if e == event:

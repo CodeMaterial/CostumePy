@@ -61,8 +61,11 @@ class CostumeModule(Process):
         self.send_queue = manager_queue
         self.receive_queue = module_queue
 
-    def broadcast(self, message_id, data=None, delay=0):
-        event = Event(message_id, data=data, delay=delay, source=self.name)
+    def broadcast(self, event, data=None, delay=0):
+
+        if not isinstance(event, Event):
+            event = Event(event, data=data, delay=delay, source=self.name)
+
         logging.debug("Broadcasting %r" % event)
         self.send_queue.put(event)
 

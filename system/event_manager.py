@@ -24,7 +24,7 @@ class EventManager(Process):
         return "<Event Manager>"
 
     def list_modules(self, event):
-        self.broadcast("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
+        self.inject("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
 
     def add_module(self, module_class):
 
@@ -101,9 +101,12 @@ class EventManager(Process):
 
         return queues
 
-    def broadcast(self, message_id, data=None, delay=0):
-        event = Event(message_id, data=data, delay=delay,source=self.name)
-        logging.debug("Broadcasting event %r" % event)
+    def inject(self, event, data=None, delay=0):
+
+        if not isinstance(event, Event):
+            event = Event(event, data=data, delay=delay, source=self.name)
+
+        logging.debug("Injecting event %r" % event)
         for queue in self.find_queues(event):
             queue.put(event)
 
