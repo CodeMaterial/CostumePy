@@ -87,7 +87,6 @@ class CostumeModule(Process):
             self.shutdown(None)
             pass
 
-        logging.info("Finished idle")
 
     def run_at_frame_rate(self):
 
