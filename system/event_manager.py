@@ -26,13 +26,13 @@ class EventManager(Process):
     def list_modules(self, event):
         self.inject("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
 
-    def add_module(self, module_class):
+    def add_module(self, module_class, unit_test=True):
 
-        passed_testing = self.test_module(module_class)
-
-        if not passed_testing:
-            logging.error("%s failed to pass test criteria. Dropping" % module_class.__name__)
-            return
+        if unit_test:
+            passed_testing = self.test_module(module_class)
+            if not passed_testing:
+                logging.error("%s failed to pass test criteria. Dropping" % module_class.__name__)
+                return
 
         module = module_class()
 

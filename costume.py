@@ -17,7 +17,7 @@ def set_logging(suit_name):
     logging.info("-"*10+" Starting Costume "+"-"*10)
 
 
-def launch_costume(suit_config):
+def launch_costume(suit_config, unit_test = True):
 
     start = time.time()
 
@@ -25,9 +25,9 @@ def launch_costume(suit_config):
 
     event_manager = EventManager()
 
-    suitFile = open(suit_config, "r")
+    suit_file = open(suit_config, "r")
 
-    lines = suitFile.read().split("\n")
+    lines = suit_file.read().split("\n")
 
     for line in lines:
         parts = line.split(" -> ")
@@ -35,7 +35,7 @@ def launch_costume(suit_config):
             path, moduleName = parts
             exec("from %s import %s" % (path, moduleName))
             module = eval(moduleName)
-            event_manager.add_module(module)
+            event_manager.add_module(module, unit_test=unit_test)
 
     event_manager.start_modules()
     event_manager.start()
