@@ -2,7 +2,8 @@ import logging
 import time
 from CostumePy.system.event_manager import EventManager
 
-def set_logging(suit_name):
+
+def _set_logging(suit_name):
 
     logging_format = '%(asctime)s [%(levelname)-5s] %(processName)-10.10s -> %(module)-15.15s  %(message)s'
 
@@ -21,21 +22,26 @@ def launch_costume(suit_config, unit_test = True):
 
     start = time.time()
 
-    set_logging(suit_config.replace(".suit", ""))
+    _set_logging(suit_config.replace(".suit", ""))
 
     event_manager = EventManager()
 
-    suit_file = open(suit_config, "r")
+    try:
+        suit_file = open(suit_config, "r")
+    except:
+        logging.error("Cannot load %s" % suit_config)
+        return
 
     lines = suit_file.read().split("\n")
 
     for line in lines:
-        parts = line.split(" -> ")
-        if len(parts) == 2:
-            path, moduleName = parts
-            exec("from %s import %s" % (path, moduleName))
-            module = eval(moduleName)
-            event_manager.add_module(module, unit_test=unit_test)
+        if not line.startswith("#"):
+            parts = line.split(" -> ")
+            if len(parts) == 2:
+                path, module_name = parts
+                exec("from %s import %s" % (path, module_name))
+                module = eval(module_name)
+                event_manager.add_module(module, unit_test=unit_test)
 
     event_manager.start_modules()
     event_manager.start()

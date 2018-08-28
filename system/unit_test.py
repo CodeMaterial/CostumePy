@@ -6,15 +6,19 @@ from multiprocessing import Queue
 
 class UnitTest:
 
-    def __init__(self, module_class, timeout=1):
+    def __init__(self, timeout=1):
         self.current_test_name = ""
         self.passed = True
-        self.diagnostic = {}
         self.send_queue = Queue()
         self.receive_queue = Queue()
-        self.module_class = module_class
+        self.module_class = self._get_module()
         self.module = None
         self.timeout = timeout
+
+    def _get_module(self):
+        module_name = self.__class__.__name__.replace("Test", "")
+        exec("from modules.%s import %s" % (module_name.lower(), module_name))
+        return eval(module_name)
 
     def send_input(self, event, data=None, delay=0, source=None):
 
@@ -33,24 +37,23 @@ class UnitTest:
             self.passed = False
             return
 
-        self.run_all_tests()
+        self._run_all_tests()
 
     def has_passed(self):
         return self.passed
 
-    def clear_queues(self):
+    def _clear_queues(self):
         logging.info("Clearing queues")
         for q in [self.send_queue, self.receive_queue]:
             while not q.empty():
                 q.get()
 
-    def run_all_tests(self):
+    def _run_all_tests(self):
         for func in dir(self):
             if func.startswith("test_"):
                 self.current_test_name = func
                 test_function = eval("self.%s" % func)
-                self.diagnostic[self.current_test_name] = ""
-                self.clear_queues()
+                self._clear_queues()
 
                 logging.info("testing %s..." % func)
                 try:
@@ -60,11 +63,11 @@ class UnitTest:
                     logging.error("%s failed" % func)
                     self.passed = False
 
-        self.__test_shutdown()
+        self._test_shutdown()
 
         logging.info(self.__class__.__name__ + (" Passed!" if self.passed else " Failed!"))
 
-    def __test_shutdown(self):
+    def _test_shutdown(self):
 
         self.send_queue.put(Event("SHUTDOWN"))
         start_time = time.time()

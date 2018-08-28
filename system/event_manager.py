@@ -23,18 +23,18 @@ class EventManager(Process):
     def __repr__(self):
         return "<Event Manager>"
 
-    def list_modules(self, event):
-        self.inject("ALL_MODULES", data=list(self.modules.keys()))  # Cast to a list to make pickle-able
-
     def add_module(self, module_class, unit_test=True):
 
         if unit_test:
-            passed_testing = self.test_module(module_class)
+            passed_testing = self._test_module(module_class)
             if not passed_testing:
                 logging.error("%s failed to pass test criteria. Dropping" % module_class.__name__)
                 return
-
-        module = module_class()
+        try:
+            module = module_class()
+        except:
+            logging.error("%s failed to initialise. Dropping" % module_class.__name__)
+            return
 
         self.modules[module.name] = module
 
@@ -53,7 +53,7 @@ class EventManager(Process):
 
         logging.debug("%r added to manager" % module)
 
-    def test_module(self, module):
+    def _test_module(self, module):
         logging.info("Testing module %s" % module.__name__)
 
         try:
@@ -86,7 +86,7 @@ class EventManager(Process):
         logging.info("All modules joined")
         self.running = False
 
-    def find_queues(self, event):
+    def _find_queues(self, event):
 
         queues = []
 
@@ -107,7 +107,7 @@ class EventManager(Process):
             event = Event(event, data=data, delay=delay, source=self.name)
 
         logging.debug("Injecting event %r" % event)
-        for queue in self.find_queues(event):
+        for queue in self._find_queues(event):
             queue.put(event)
 
     """ This method should be called directly in the main process but can be called as a process using start()
@@ -127,7 +127,7 @@ class EventManager(Process):
                         if event.name in self.own_listeners:
                             self.own_listeners[event.name](event)
                         else:
-                            queues = self.find_queues(event)
+                            queues = self._find_queues(event)
                             logging.debug("Sending: %r to %r" % (event, queues))
                             for queue in queues:
                                 queue.put(event)
