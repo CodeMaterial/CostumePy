@@ -1,12 +1,12 @@
 # :tophat: Costume Py :tophat:
 
-Costume Py is a library designed to allow developers to create smart wearable costumes. 
+CostumePy is a library designed to allow developers to create smart wearable costumes. 
 The overall aim is to create a more dynamic programming style compared to the linear `while True:` systems.
 
 ## Getting Started
 
 Each part of the system is a `CostumeModule` which can be run, tested and communicated with concurrently.
-Below I am going to give some example modules
+Below I am going to give some example modules.
 
 ### Example  File Structure
 
@@ -19,12 +19,10 @@ modules/
     __init__.py
     button.py
     led.py
-    #your modules here
 
 tests/
     __init__.py
     button_test.py
-    #your tests here
 
 example.suit
 main.py
@@ -139,32 +137,33 @@ costume_manager.inject("NOSE_PRESS")
 ## Example Output
 
 ```text
-2018-08-29 01:09:31,152 [INFO ] MainProces -> costume          ---------- Starting Costume ----------
-2018-08-29 01:09:31,198 [INFO ] MainProces -> event_manager    Testing module Button
-2018-08-29 01:09:31,205 [INFO ] MainProces -> costume_modules  Initialised
-2018-08-29 01:09:31,208 [INFO ] MainProces -> unit_test        Clearing queues
-2018-08-29 01:09:31,209 [INFO ] MainProces -> unit_test        testing test_blush_off...
-2018-08-29 01:09:31,211 [INFO ] Button     -> costume_modules  Starting idle
-2018-08-29 01:09:31,246 [INFO ] Button     -> button           Cute input detected!
-2018-08-29 01:09:31,247 [INFO ] MainProces -> unit_test        test_blush_off passed
-2018-08-29 01:09:31,248 [INFO ] MainProces -> unit_test        Clearing queues
-2018-08-29 01:09:31,248 [INFO ] MainProces -> unit_test        testing test_blush_on...
-2018-08-29 01:09:31,281 [INFO ] Button     -> button           Cute input detected!
-2018-08-29 01:09:31,282 [INFO ] MainProces -> unit_test        test_blush_on passed
-2018-08-29 01:09:31,315 [INFO ] Button     -> costume_modules  Shutting down
-2018-08-29 01:09:31,316 [INFO ] MainProces -> unit_test        test_shutdown Passed, Module shutdown in 0.03 seconds
-2018-08-29 01:09:31,316 [INFO ] MainProces -> unit_test        ButtonTest Passed!
-2018-08-29 01:09:31,317 [INFO ] MainProces -> costume_modules  Initialised
-2018-08-29 01:09:31,322 [INFO ] MainProces -> event_manager    Testing module BlushLED
-2018-08-29 01:09:31,322 [ERROR] MainProces -> event_manager    Cannot load BlushLEDTest, does it exist?
-2018-08-29 01:09:31,322 [INFO ] MainProces -> costume_modules  Initialised
-2018-08-29 01:09:31,326 [INFO ] MainProces -> costume          rorschach.suit launched in 0.17 seconds!
-2018-08-29 01:09:31,330 [INFO ] Button     -> costume_modules  Starting idle
-2018-08-29 01:09:31,331 [INFO ] BlushLED   -> costume_modules  Starting idle
-2018-08-29 01:09:32,341 [INFO ] Button     -> button           Cute input detected!
-2018-08-29 01:09:32,375 [INFO ] BlushLED   -> LED              blushing on
-2018-08-29 01:09:35,651 [INFO ] Button     -> costume_modules  Shutting down
-2018-08-29 01:09:35,652 [INFO ] BlushLED   -> costume_modules  Shutting down
+2018-08-29 01:13:55,569 [INFO ] MainProces -> costume          ---------- Starting Costume ----------
+2018-08-29 01:13:55,607 [INFO ] MainProces -> event_manager    Testing module Button
+2018-08-29 01:13:55,609 [INFO ] MainProces -> costume_modules  Initialised
+2018-08-29 01:13:55,611 [INFO ] MainProces -> unit_test        Clearing queues
+2018-08-29 01:13:55,612 [INFO ] MainProces -> unit_test        testing test_blush_off...
+2018-08-29 01:13:55,613 [INFO ] Button     -> costume_modules  Starting idle
+2018-08-29 01:13:55,647 [INFO ] Button     -> button           Cute input detected!
+2018-08-29 01:13:55,660 [INFO ] MainProces -> unit_test        test_blush_off passed
+2018-08-29 01:13:55,661 [INFO ] MainProces -> unit_test        Clearing queues
+2018-08-29 01:13:55,661 [INFO ] MainProces -> unit_test        testing test_blush_on...
+2018-08-29 01:13:55,693 [INFO ] Button     -> button           Cute input detected!
+2018-08-29 01:13:55,693 [INFO ] MainProces -> unit_test        test_blush_on passed
+2018-08-29 01:13:55,727 [INFO ] Button     -> costume_modules  Shutting down
+2018-08-29 01:13:55,729 [INFO ] MainProces -> unit_test        test_shutdown Passed, Module shutdown in 0.04 seconds
+2018-08-29 01:13:55,730 [INFO ] MainProces -> unit_test        ButtonTest Passed!
+2018-08-29 01:13:55,730 [INFO ] MainProces -> costume_modules  Initialised
+2018-08-29 01:13:55,732 [INFO ] MainProces -> event_manager    Testing module BlushLED
+2018-08-29 01:13:55,732 [ERROR] MainProces -> event_manager    Cannot load BlushLEDTest, does it exist?
+2018-08-29 01:13:55,733 [INFO ] MainProces -> costume_modules  Initialised
+2018-08-29 01:13:55,737 [INFO ] BlushLED   -> costume_modules  Starting idle
+2018-08-29 01:13:55,737 [INFO ] MainProces -> costume          rorschach.suit launched in 0.17 seconds!
+2018-08-29 01:13:55,741 [INFO ] Button     -> costume_modules  Starting idle
+2018-08-29 01:13:56,759 [INFO ] Button     -> button           Cute input detected!
+2018-08-29 01:13:56,777 [INFO ] BlushLED   -> LED              blushing on
+2018-08-29 01:14:01,842 [INFO ] BlushLED   -> LED              blushing off
+2018-08-29 01:14:06,582 [INFO ] BlushLED   -> costume_modules  Shutting down
+2018-08-29 01:14:06,583 [INFO ] Button     -> costume_modules  Shutting down
 ```
 
 
