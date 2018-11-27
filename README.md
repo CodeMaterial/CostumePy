@@ -125,9 +125,9 @@ To start the suit we simply need to run the following code. The inject command s
 
 ```python
 import time
-from CostumePy.costume import launch_costume
+import CostumePy
 
-costume_manager = launch_costume("example.suit")
+costume_manager = CostumePy.launch_costume("example.suit")
 
 time.sleep(1)
 
