@@ -1,90 +1,23 @@
 # :tophat: Costume Py :tophat:
 
 CostumePy is a library designed to allow developers to create smart wearable costumes. 
-The overall aim is to create a more dynamic programming style compared to the linear `while True:` systems.
-
-## greeter.py
-
-This node listens for movement messages and broadcasts a greeting message in response 
-
-```python
-import CostumePy
+The overall aim is to create a more ROS-like, dynamic programming style compared to the linear `while True:` systems.
 
 
-def movement_callback(message, name):
-
-    if message == True:
-        CostumePy.broadcast("greeting", data="Hello %s!" % name)
-    else:
-        CostumePy.broadcast("greeting", data="Goodbye %s!" % name)
-
-
-if __name__ == "__main__":
-
-    CostumePy.init("world greeter")
-
-    CostumePy.listen("movement", movement_callback, args="world")
-
-
-    while CostumePy.is_running():
-        print("Listening")
-        CostumePy.limit(1) #  In frames per second
-```
-
-
-## greeter_test.py
-
-This file tests the greeter node.
+Here is an example file which listens for a nose_press message then reacts with a callback
 
 ```python
 import CostumePy
 
-wgt = CostumePy.test("world greeter")
 
-if not wgt.responding():
-    print("agh not responding!")
+def nose_press_function(msg):
+    print("You pressed my nose %s!" % msg.data)
 
 
-msg_in = CostumePy.message("movement", data=True)
-msg_out = CostumePy.message("greeting", data="Hello world!")
+CostumePy.listen_to("nose_press", nose_press_function)
 
-hello_results = wgt.is_equal(msg_in, msg_out)
-
-if hello_results == False:
-    print("hello world isn't working")
-
-msg_in = CostumePy.message("movement", data=False)
-msg_out = CostumePy.message("greeting", data="Goodbye world!")
-
-goodbye_results = wgt.is_equal(msg_in, msg_out)
-
-if goodbye_results == False:
-    print("goodbye world isn't working")
-
+CostumePy.broadcast("nose_press", data="hard")
 ```
-
-
-### main.py
-
-To start the suit we simply need to run the following code. The inject command sends a `NOSE_PRESS` event to the system to simulate GPIO input.
-
-```python
-import time
-import CostumePy
-
-costume_manager = CostumePy.launch_costume("example.suit")
-
-time.sleep(1)
-
-costume_manager.inject("NOSE_PRESS")
-```
-
-## Example Output
-
-```
-TODO
-```
-
 
 ## Versioning
 
