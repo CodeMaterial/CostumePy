@@ -8,3 +8,7 @@ def listen_to(topic, callback):
 
 def broadcast(topic, data=None):
     node.broadcast(topic, data=data)
+
+
+def broadcast_message(msg):
+    node.broadcast_message(msg)

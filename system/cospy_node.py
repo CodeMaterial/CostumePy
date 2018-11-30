@@ -53,4 +53,7 @@ class CospyNode:
 
     def broadcast(self, topic, data=None):
         msg = Message(topic, data=data)
+        self.broadcast_message(msg)
+
+    def broadcast_message(self, msg):
         self._main_queue.put(msg)
