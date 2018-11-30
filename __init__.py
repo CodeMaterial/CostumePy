@@ -1,10 +1,10 @@
-from CostumePy.system.cospy_node import CustomManager
+from CostumePy.system.cospy_node import CospyNode
 
-cm = CustomManager(__file__)
+node = CospyNode(__file__)
 
 def listen_to(topic, callback):
-    cm.listen_to(topic, callback)
+    node.listen_to(topic, callback)
 
 
 def broadcast(topic, data=None):
-    cm.broadcast(topic, data=data)
+    node.broadcast(topic, data=data)
