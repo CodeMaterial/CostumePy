@@ -1,7 +1,7 @@
 from multiprocessing import Process
 import time
 import logging
-from CostumePy.system.events import Event
+from CostumePy.system.message import Event
 
 
 class CostumeModule(Process):

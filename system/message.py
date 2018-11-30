@@ -1,7 +1,7 @@
 import time
 
 
-class Event(object):
+class Message(object):
 
     def __init__(self, name, data=None, delay=0, source=None):
         super().__init__()

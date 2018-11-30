@@ -2,7 +2,7 @@ import logging
 import time
 from multiprocessing import Process, Queue
 
-from CostumePy.system.events import Event
+from CostumePy.system.message import Event
 
 
 class EventManager(Process):

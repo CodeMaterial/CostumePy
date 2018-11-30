@@ -1,6 +1,6 @@
 import logging
 import time
-from CostumePy.system.events import Event
+from CostumePy.system.message import Event
 from multiprocessing import Queue
 
 
