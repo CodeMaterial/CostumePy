@@ -50,7 +50,8 @@ class CospyManager:
                         topic_to_listen = msg.data["topic"]
                         if topic_to_listen not in self._listeners:
                             self._listeners[topic_to_listen] = []
-                        self._listeners[topic_to_listen].append(node_name)
+                        if node_name not in self._listeners[topic_to_listen]:
+                            self._listeners[topic_to_listen].append(node_name)
                     else:
                         print(self._listeners)
                         for node_name in self._listeners[msg.topic]:
