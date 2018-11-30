@@ -6,9 +6,6 @@ import threading
 import time
 
 
-class QueueManager(BaseManager):
-    pass
-
 
 class CospyManager:
 
@@ -17,7 +14,7 @@ class CospyManager:
         self._node_queues = {}
         self._listeners = {}
 
-        self._queue_manager = QueueManager(address=('', address), authkey=authkey)
+        self._queue_manager = BaseManager(address=('', address), authkey=authkey)
         self._queue_manager.register('get_node_queue', callable=self._get_node_queue)
         self._queue_manager.register('get_main_queue', callable=self._get_main_queue)
 
