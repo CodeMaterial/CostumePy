@@ -2,38 +2,33 @@ import time
 import logging
 import zmq
 import threading
+import CostumePy
 
 class CospyManager:
 
     def __init__(self):
         self._node_sockets = {}
         self._listeners = {}
-        self.set_logging_level(logging.INFO)
+        CostumePy.set_logging_level(logging.DEBUG)
 
-        self.zmq_context = zmq.Context()
-        self.request_socket = self.zmq_context.socket(zmq.REP)
+        self.request_socket = zmq.Context().socket(zmq.REP)
         self.request_socket.bind("tcp://*:5556")
 
-        self.ip_iter = 5557
+        self.avaliable_ip = 5557
 
-        self._address_manager = threading.Thread(target=self.manage_requests)
-        self._address_manager.start()
+        ip_address_manager = threading.Thread(target=self.manage_ip_requests)
+        ip_address_manager.start()
 
-    def manage_requests(self):
+    def manage_ip_requests(self):
 
         while True:
             node_name = self.request_socket.recv_string()
-            address = "tcp://localhost:%i" % self.ip_iter
+            address = "tcp://localhost:%i" % self.avaliable_ip
             self.request_socket.send_string(address)
             soc = zmq.Context().socket(zmq.PAIR)
-            soc.bind("tcp://*:%i" % self.ip_iter)
+            soc.bind("tcp://*:%i" % self.avaliable_ip)
             self._node_sockets[node_name] = soc
-            self.ip_iter += 1
-
-
-    def set_logging_level(self, logging_level):
-        logging_format = '%(asctime)s [%(levelname)-5s]  %(message)s'
-        logging.basicConfig(level=logging_level, format=logging_format)
+            self.avaliable_ip += 1
 
     def register_node(self, node_name, topic_to_listen):
         logging.info("Registering  %s for %s" % (node_name, topic_to_listen))
@@ -48,16 +43,17 @@ class CospyManager:
 
         logging.info("Starting queue management")
 
-        msg_todo = []
+        msg_backlog = []
 
         while True:
-            messages = msg_todo
-            msg_todo = []
+            messages = msg_backlog
+            msg_backlog = []
             for node_name in list(self._node_sockets):
                 try:
                     soc = self._node_sockets[node_name]
                     msg = soc.recv_json(flags=zmq.NOBLOCK)
-                    msg["_node_name"] = node_name
+                    if msg["source"] is None:
+                        msg["source"] = node_name
                     messages.append(msg)
                 except zmq.Again:
                     pass
@@ -65,17 +61,16 @@ class CospyManager:
             for msg in messages:
 
                 if msg["action_at"] > time.time():
-                    msg_todo.append(msg)
+                    msg_backlog.append(msg)
                 else:
                     logging.info("Received message %r" % msg)
 
                     if msg["topic"] == "_listen_for":
-                        self.register_node(msg["_node_name"], msg["data"])
+                        self.register_node(msg["source"], msg["data"])
                     else:
                         if msg["topic"] in self._listeners:
                             for node_name in self._listeners[msg["topic"]]:
                                 logging.info("Sending %r to %s" % (msg, node_name))
-                                msg["responded"] = True
                                 self._node_sockets[node_name].send_json(msg)
                         else:
                             logging.info("No one listening to %s" % msg)
@@ -83,5 +78,4 @@ class CospyManager:
 
 if __name__ == "__main__":
     cm = CospyManager()
-    cm.set_logging_level(logging.DEBUG)
     cm.run()
