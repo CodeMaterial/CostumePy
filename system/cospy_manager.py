@@ -1,5 +1,6 @@
 from multiprocessing.managers import process
 from multiprocessing.managers import BaseManager
+from message import Message
 
 import queue
 import threading
