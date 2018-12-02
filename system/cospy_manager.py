@@ -1,55 +1,35 @@
-from multiprocessing.managers import process
-from multiprocessing.managers import BaseManager
-from message import Message
-
-import queue
-import threading
 import time
 import logging
-
+import zmq
+import threading
 
 class CospyManager:
 
-    def __init__(self, manager_key='costume'):
-        self._main_queue = queue.Queue()
-        self._node_queues = {}
+    def __init__(self):
+        self._node_sockets = {}
         self._listeners = {}
         self.set_logging_level(logging.INFO)
 
-        try:
-            logging.info("Creating new Cospy Manager")
-            self._queue_manager = BaseManager(address=('', 50000), authkey=manager_key.encode('UTF-8'))
-            self._queue_manager.register('get_node_queue', callable=self._get_node_queue)
-            self._queue_manager.register('get_main_queue', callable=self._get_main_queue)
-        except:
-            logging.info("Failed to register Cospy manager")
-            raise
+        self.zmq_context = zmq.Context()
+        self.request_socket = self.zmq_context.socket(zmq.REP)
+        self.request_socket.bind("tcp://*:5556")
 
-        try:
-            logging.info("Launching new Cospy manager server")
-            queue_server = self._queue_manager.get_server()
+        self.ip_iter = 5557
 
-            queue_server.stop_event = threading.Event()
+        self._address_manager = threading.Thread(target=self.manage_requests)
+        self._address_manager.start()
 
-            process.current_process()._manager_server = queue_server
+    def manage_requests(self):
 
-            queue_server_accepter = threading.Thread(target=queue_server.accepter)
-            queue_server_accepter.daemon = True
-            queue_server_accepter.start()
-        except:
-            logging.info("Failed to launch Cospy server")
-            raise
+        while True:
+            node_name = self.request_socket.recv_string()
+            address = "tcp://localhost:%i" % self.ip_iter
+            self.request_socket.send_string(address)
+            soc = zmq.Context().socket(zmq.PAIR)
+            soc.bind("tcp://*:%i" % self.ip_iter)
+            self._node_sockets[node_name] = soc
+            self.ip_iter += 1
 
-    def _get_main_queue(self):
-        return self._main_queue
-
-    def _get_node_queue(self, node_name):
-        logging.info("Retrieving node queue for %s" % node_name)
-        if node_name not in self._node_queues:
-            logging.info("Node queue for %s does not exist, creating." % node_name)
-            self._node_queues[node_name] = queue.Queue()
-
-        return self._node_queues[node_name]
 
     def set_logging_level(self, logging_level):
         logging_format = '%(asctime)s [%(levelname)-5s]  %(message)s'
@@ -68,20 +48,35 @@ class CospyManager:
 
         logging.info("Starting queue management")
 
+        msg_todo = []
+
         while True:
-            if not self._main_queue.empty():
-                msg = self._main_queue.get()
-                if msg.action_at > time.time():
-                    self._main_queue.put(msg)
+            messages = msg_todo
+            msg_todo = []
+            for node_name in list(self._node_sockets):
+                try:
+                    soc = self._node_sockets[node_name]
+                    msg = soc.recv_json(flags=zmq.NOBLOCK)
+                    msg["_node_name"] = node_name
+                    messages.append(msg)
+                except zmq.Again:
+                    pass
+
+            for msg in messages:
+
+                if msg["action_at"] > time.time():
+                    msg_todo.append(msg)
                 else:
                     logging.info("Received message %r" % msg)
-                    if msg.topic == "_listen_for":
-                        self.register_node(msg.data["node_name"], msg.data["topic"])
+
+                    if msg["topic"] == "_listen_for":
+                        self.register_node(msg["_node_name"], msg["data"])
                     else:
-                        if msg.topic in self._listeners:
-                            for node_name in self._listeners[msg.topic]:
+                        if msg["topic"] in self._listeners:
+                            for node_name in self._listeners[msg["topic"]]:
                                 logging.info("Sending %r to %s" % (msg, node_name))
-                                self._node_queues[node_name].put(msg)
+                                msg["responded"] = True
+                                self._node_sockets[node_name].send_json(msg)
                         else:
                             logging.info("No one listening to %s" % msg)
 
