@@ -29,12 +29,12 @@ class CospyNode:
     def _request_socket_ip(self):
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        manager_available = sock.connect_ex(('', 5556)) == 0
+        manager_available = sock.connect_ex(('', 55556)) == 0
         if not manager_available:
             raise ConnectionRefusedError("Cannot contact manager, has it been started?")
 
         ip_socket = self._zmq_context.socket(zmq.REQ)
-        ip_socket.connect("tcp://localhost:5556")
+        ip_socket.connect("tcp://localhost:55556")
         ip_socket.send_string(self.name)
 
         ip_address = ip_socket.recv().decode('UTF-8')
@@ -73,3 +73,7 @@ class CospyNode:
     def broadcast_message(self, msg):
         logging.debug("Broadcasting message %r" % msg)
         self.manager_sock.send_json(msg)
+
+    def broadcast(self, topic, data=None, delay=0):
+        msg = CostumePy.message(topic, data=data, delay=delay)
+        self.broadcast_message(msg)

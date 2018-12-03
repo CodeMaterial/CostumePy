@@ -4,9 +4,9 @@ import logging
 from CostumePy.system.cospy_node import CospyNode
 
 
-def message(topic, data=None, delay=0, source=None):
+def message(topic, data=None, delay=0):
     created = time.time()
-    return {"source": source,
+    return {"source": None,
             "topic": topic,
             "data": data,
             "created": created,
@@ -25,9 +25,8 @@ def listen_to(topic, callback):
     get_node().listen_to(topic, callback)
 
 
-def broadcast(topic, data=None, delay=0, source=None):
-    msg = message(topic, data=data, delay=delay, source=source)
-    get_node().broadcast_message(msg)
+def broadcast(topic, data=None, delay=0):
+    get_node().broadcast(topic, data=data, delay=delay)
 
 
 def broadcast_message(msg):

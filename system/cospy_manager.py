@@ -14,9 +14,9 @@ class CospyManager:
         self._manager_listeners = {"_listen_for": self.register_listener}
 
         self.request_socket = zmq.Context().socket(zmq.REP)
-        self.request_socket.bind("tcp://*:5556")
+        self.request_socket.bind("tcp://*:55556")
 
-        self.available_ip = 5557
+        self.available_ip = 55557
 
         ip_address_manager = threading.Thread(target=self.manage_ip_requests)
         ip_address_manager.start()
@@ -51,7 +51,8 @@ class CospyManager:
                 try:
                     soc = self._node_sockets[node_name]
                     msg = soc.recv_json(flags=zmq.NOBLOCK)
-                    msg["source"] = node_name if msg["source"] is None else msg["source"]
+                    print(msg)
+                    msg["source"] = node_name
 
                     if msg["action_at"] <= time.time():
                         logging.info("Received message %r" % msg)
