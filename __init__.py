@@ -4,7 +4,8 @@ import logging
 from CostumePy.system.cospy_node import CospyNode
 
 
-def message(topic, data=None, delay=0, source=None, created=time.time()):
+def message(topic, data=None, delay=0, source=None):
+    created = time.time()
     return {"source": source,
             "topic": topic,
             "data": data,
@@ -42,6 +43,12 @@ def set_node_name(new_name):
     global node_name
     node_name = new_name
 
+
+def new_node(new_name):
+    return CospyNode(new_name)
+
+def stop():
+    get_node().stop()
 
 node = None
 node_name = sys.argv[0]

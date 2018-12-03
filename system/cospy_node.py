@@ -2,6 +2,7 @@ import threading
 import logging
 import zmq
 import CostumePy
+import socket
 
 
 class CospyNode:
@@ -9,20 +10,40 @@ class CospyNode:
     def __init__(self, name):
         self.name = name
         self.listening_to = {}
+        self.running = True
 
         self._zmq_context = zmq.Context()
 
         self.manager_sock = self._zmq_context.socket(zmq.PAIR)
-        self.manager_sock.connect(self._request_socket_ip())
+
+        try:
+            address = self._request_socket_ip()
+            self.manager_sock.connect(address)
+        except ConnectionRefusedError:
+            raise
+
 
         self._callback_listener = threading.Thread(target=self._listen_for_callbacks)
         self._callback_listener.start()
 
     def _request_socket_ip(self):
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        manager_available = sock.connect_ex(('', 5556)) == 0
+        if not manager_available:
+            raise ConnectionRefusedError("Cannot contact manager, has it been started?")
+
         ip_socket = self._zmq_context.socket(zmq.REQ)
         ip_socket.connect("tcp://localhost:5556")
         ip_socket.send_string(self.name)
-        return ip_socket.recv().decode('UTF-8')
+
+        ip_address = ip_socket.recv().decode('UTF-8')
+
+        return ip_address
+
+    def stop(self):
+        self.running = False
+        self._callback_listener.join()
 
     def listen_to(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)
@@ -38,7 +59,7 @@ class CospyNode:
     def _listen_for_callbacks(self):
 
         logging.info("Listening for callbacks")
-        while True:
+        while self.running:
             try:
                 msg = self.manager_sock.recv_json(flags=zmq.NOBLOCK)
                 if msg["topic"] in self.listening_to:
