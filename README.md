@@ -21,6 +21,42 @@ CostumePy.listen_to("nose_press", nose_press_function)
 CostumePy.broadcast("nose_press", data="hard")
 ```
 
+## Installation
+
+CostumePy is currently only compatible with Python 3.x
+
+If you've installed it directly yourself simply run:
+
+```commandline
+python setup.py install
+
+```
+
+If you're using a Raspberry Pi or a machine with both Python 2 and 3 installed, use the following command:
+
+```commandline
+python3 setup.py install
+```
+
+## Cospy_Manager
+
+To use CostumePy, you first have to launch the manager. Otherwise you will receive the following error:
+
+To start the manager run:
+
+```commandline
+python -m CostumePy.launch_manager
+```
+
+To run this in the background on a Linux system, append the command with an ``` &```
+
+Otherwise you will get the following error when trying to broadcast or listen to a topic
+
+```commandline
+  File "/usr/local/lib/python3.5/dist-packages/CostumePy-0.0.1-py3.5.egg/CostumePy/cospy_node.py", line 33, in _request_socket_ip
+ConnectionRefusedError: Cannot contact manager, has it been started?
+```
+
 ## Versioning
 
 This project is still in development so please expect wild code changes.
