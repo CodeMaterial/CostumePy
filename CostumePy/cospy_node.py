@@ -3,6 +3,7 @@ import logging
 import zmq
 import CostumePy
 import socket
+import time
 
 
 class CospyNode:
@@ -26,12 +27,18 @@ class CospyNode:
         self._callback_listener = threading.Thread(target=self._listen_for_callbacks)
         self._callback_listener.start()
 
-    def _request_socket_ip(self):
+    def _request_socket_ip(self, retries=0):
+
+        if retries > 5:
+            raise ConnectionRefusedError("Cannot contact manager, has it been started?")
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         manager_available = sock.connect_ex(('', 55556)) == 0
         if not manager_available:
-            raise ConnectionRefusedError("Cannot contact manager, has it been started?")
+            logging.info("Cannot connect to manager, retrying...")
+            time.sleep(1)
+            return self._request_socket_ip(retries=retries+1)
+
 
         ip_socket = self._zmq_context.socket(zmq.REQ)
         ip_socket.connect("tcp://localhost:55556")
