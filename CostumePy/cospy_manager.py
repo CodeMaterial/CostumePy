@@ -61,7 +61,6 @@ class CospyManager:
                     try:
                         soc = self._node_sockets[node_name]
                         msg = soc.recv_json(flags=zmq.NOBLOCK)
-                        print(msg)
                         msg["source"] = node_name
 
                         if msg["action_at"] <= time.time():

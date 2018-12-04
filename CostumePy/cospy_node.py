@@ -34,6 +34,7 @@ class CospyNode:
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         manager_available = sock.connect_ex(('', 55556)) == 0
+        sock.close()
         if not manager_available:
             logging.info("Cannot connect to manager, retrying...")
             time.sleep(1)
