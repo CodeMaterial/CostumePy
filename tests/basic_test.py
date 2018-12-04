@@ -11,7 +11,7 @@ class CallbackReceiver:
     def func(self, msg):
         self.received = msg
 
-    def get_received(self, timeout=1):
+    def get_received(self, timeout=5):
         start = time.time()
         while (time.time() - start < timeout) and self.received is None:
             time.sleep(0.1)
