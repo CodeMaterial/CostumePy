@@ -1,4 +1,6 @@
 # :tophat: Costume Py :tophat:
+[![Build status](https://travis-ci.org/codematerial/travis-lab.svg?master)](https://travis-ci.org/codematerial)
+
 
 CostumePy is a library designed to allow developers to create smart wearable costumes. 
 The overall aim is to create a more ROS-like, dynamic programming style compared to the linear `while True:` systems.

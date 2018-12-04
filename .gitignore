@@ -6,3 +6,8 @@ temp.*
 NOTES.txt
 
 config
+
+dist
+build
+
+*.egg-info

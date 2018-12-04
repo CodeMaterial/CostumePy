@@ -70,8 +70,3 @@ class CospyManager:
                                 logging.info("No one listening to %s" % msg)
                 except zmq.Again:
                     pass
-
-
-if __name__ == "__main__":
-    cm = CospyManager()
-    cm.run()

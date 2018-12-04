@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.6"
+install:
+  - python setup.py install
+
+before_script:
+  - python CostumePy/launch_manager.py
+script:
+  - python tests/basic_test.py

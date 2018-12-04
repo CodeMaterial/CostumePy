@@ -1,7 +1,7 @@
 import sys
 import time
 import logging
-from CostumePy.system.cospy_node import CospyNode
+from CostumePy.cospy_node import CospyNode
 
 
 def message(topic, data=None, delay=0):
