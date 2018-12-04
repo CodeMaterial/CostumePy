@@ -46,8 +46,10 @@ def set_node_name(new_name):
 def new_node(new_name):
     return CospyNode(new_name)
 
+
 def stop():
     get_node().stop()
+
 
 node = None
 node_name = sys.argv[0]

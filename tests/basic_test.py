@@ -24,14 +24,8 @@ cr = CallbackReceiver()
 
 class SendReceiveTest(unittest.TestCase):
 
-    def test_name(self):
-        self.assertIn('unittest', CostumePy.node_name)
-
     def test_listen(self):
         CostumePy.listen_to("test", cr.func)
-
-    def test_init(self):
-        self.assertIn('unittest', CostumePy.get_node().name)
 
     def test_broadcast(self):
         CostumePy.broadcast("test", data=True)
@@ -43,7 +37,6 @@ class SendReceiveTest(unittest.TestCase):
         self.assertEquals(msg["delay"], 0)
         self.assertEquals(msg["topic"], "test", msg="Incorrect topic: %s" % msg["topic"])
         self.assertLessEqual(msg["action_at"], time.time(), msg="Message was actioned too early")
-        self.assertIn("unittest", msg["source"], msg="Incorrect message source: %s" % msg["source"])
 
     def test_stop(self):
         CostumePy.stop()
