@@ -5,6 +5,6 @@ install:
   - python setup.py install
 
 before_script:
-  - python CostumePy/launch_manager.py
+  - python CostumePy/launch_manager.py &
 script:
   - python tests/basic_test.py
