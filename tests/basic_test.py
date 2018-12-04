@@ -1,13 +1,13 @@
 import CostumePy
+import time
 
-test1 = CostumePy.new_node("test1")
-
-def callback_function(msg):
-    print("ping %r" % msg)
-
-test1.listen_to("ping", callback_function)
+def nose_press_function(msg):
+    print("You pressed my nose %s!" % msg["data"])
 
 
-for i in range(10):
-    new_node = CostumePy.new_node("%s_test" % i)
-    new_node.broadcast_message(CostumePy.message("ping"))
+CostumePy.listen_to("nose_press", nose_press_function)
+
+CostumePy.broadcast("nose_press", data="hard")
+
+time.sleep(1)
+CostumePy.stop()

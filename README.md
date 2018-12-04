@@ -13,7 +13,7 @@ import CostumePy
 
 
 def nose_press_function(msg):
-    print("You pressed my nose %s!" % msg.data)
+    print("You pressed my nose %s!" % msg["data"])
 
 
 CostumePy.listen_to("nose_press", nose_press_function)
