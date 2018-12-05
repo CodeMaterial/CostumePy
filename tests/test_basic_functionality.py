@@ -86,15 +86,7 @@ class BulkTest(unittest.TestCase):
     def test_3_response(self):
         msg = cr.get_received(timeout=5, count=100)
         self.assertEqual(type(msg), list, msg="Message timeout reached. No messages received")
-        self.assertEquals(len(msg), 100)
+        self.assertEqual(len(msg), 100)
 
     def test_4_stop(self):
         CostumePy.stop()
-
-
-if __name__ == '__main__':
-    loader = unittest.TestLoader()
-    send_receive_suite = loader.loadTestsFromTestCase(SendReceiveTest)
-    delay_suite = loader.loadTestsFromTestCase(SendReceiveTest)
-    bulk_suite = loader.loadTestsFromTestCase(BulkTest)
-    unittest.TextTestRunner().run([send_receive_suite, delay_suite, bulk_suite])
