@@ -25,24 +25,18 @@ CostumePy.broadcast("nose_press", data="hard")
 
 CostumePy is currently only compatible with Python 3.x
 
-If you've installed it directly yourself simply run:
+If you've installed Python 3 directly yourself simply run:
 
 ```commandline
 python setup.py install
 
 ```
 
-If you're using a Raspberry Pi or a machine with both Python 2 and 3 installed, use the following command:
-
-```commandline
-python3 setup.py install
-```
+If you're using a Raspberry Pi or a machine with both Python 2 and 3 installed, replace ```python``` with ```python3```
 
 ## Cospy_Manager
 
-To use CostumePy, you first have to launch the manager. Otherwise you will receive the following error:
-
-To start the manager run:
+To use CostumePy, you first have to launch the manager. To start the manager run:
 
 ```commandline
 python -m CostumePy.launch_manager
@@ -50,12 +44,24 @@ python -m CostumePy.launch_manager
 
 To run this in the background on a Linux system, append the command with an ``` &```
 
-Otherwise you will get the following error when trying to broadcast or listen to a topic
+If you try to use CostumePy without the manager, you will get the following error when trying to broadcast or listen to a topic:
 
 ```commandline
   File "/usr/local/lib/python3.5/dist-packages/CostumePy-0.0.1-py3.5.egg/CostumePy/cospy_node.py", line 33, in _request_socket_ip
 ConnectionRefusedError: Cannot contact manager, has it been started?
 ```
+
+## Testing
+
+If you wish to test CostumePy. Simply run the following command in the CostumePy directory:
+
+```commandline
+python -m unittest discover -s tests -v
+```
+
+This will search for all files starting with ```test_``` in the ```tests``` directory.
+
+If you want to create your own tests for new features, please have a look at ```test_basic_functionality.py``` to see how to structure your tests.
 
 ## Versioning
 
@@ -63,7 +69,7 @@ This project is still in development so please expect wild code changes.
 
 ## Contributors
 
-If you would like to contribute to this project please contact one of the below authors.
+If you would like to contribute to this project please contact me below.
 
 ## Current Authors
 
