@@ -10,8 +10,9 @@ class CospyNode:
 
     def __init__(self, name):
         self.name = name
-        self.listening_to = {}
+        self.listening_to = {"_success": [self._success]}
         self.running = True
+        self.last_success = None
 
         self._zmq_context = zmq.Context()
 
@@ -22,7 +23,6 @@ class CospyNode:
             self.manager_sock.connect(address)
         except ConnectionRefusedError:
             raise
-
 
         self._callback_listener = threading.Thread(target=self._listen_for_callbacks)
         self._callback_listener.start()
@@ -63,6 +63,22 @@ class CospyNode:
         self.listening_to[topic].append(callback)
         listen_msg = CostumePy.message("_listen_for", data=topic)
         self.broadcast_message(listen_msg)
+        self.wait_for_success(listen_msg)
+
+    def _success(self, msg):
+        orig_msg = msg["data"]
+        self.last_success = orig_msg
+
+    def wait_for_success(self, msg, timeout=5):
+        logging.info("Waiting on response")
+        start = time.time()
+        while (self.last_success != msg) and (time.time() - start <= timeout):
+            time.sleep(.1)
+
+        if self.last_success != msg:
+            raise ConnectionAbortedError("Timeout reached whilst waiting for message %r" % msg)
+        else:
+            logging.info("Response recieved")
 
     def _listen_for_callbacks(self):
 
@@ -79,6 +95,7 @@ class CospyNode:
                 pass
 
     def broadcast_message(self, msg):
+        msg["source"] = self.name
         logging.debug("Broadcasting message %r" % msg)
         self.manager_sock.send_json(msg)
 

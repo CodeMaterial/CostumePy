@@ -50,6 +50,10 @@ class CospyManager:
         if node_name not in self._listeners[topic]:
             self._listeners[topic].append(node_name)
 
+        msg = CostumePy.message("_success", data=msg)
+
+        self._node_sockets[node_name].send_json(msg)
+
     def run(self):
 
         logging.info("Starting queue management")
