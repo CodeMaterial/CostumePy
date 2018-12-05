@@ -40,14 +40,13 @@ class CospyNode:
             time.sleep(1)
             return self._request_socket_ip(retries=retries+1)
 
+        with self._zmq_context.socket(zmq.REQ) as ip_socket:
+            ip_socket.connect("tcp://localhost:55556")
+            ip_socket.send_string(self.name)
 
-        ip_socket = self._zmq_context.socket(zmq.REQ)
-        ip_socket.connect("tcp://localhost:55556")
-        ip_socket.send_string(self.name)
+            ip_address = ip_socket.recv().decode('UTF-8')
 
-        ip_address = ip_socket.recv().decode('UTF-8')
-
-        return ip_address
+            return ip_address
 
     def stop(self):
         self.running = False
