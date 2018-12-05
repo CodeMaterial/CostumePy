@@ -3,6 +3,7 @@ import logging
 import zmq
 import threading
 import CostumePy
+from collections import deque
 
 
 class CospyManager:
@@ -13,6 +14,7 @@ class CospyManager:
         self.running = True
         CostumePy.set_logging_level(logging.DEBUG)
         self._manager_listeners = {"_listen_for": self.register_listener}
+        self.backlog = deque()
 
         self.request_socket = zmq.Context().socket(zmq.REP)
         self.request_socket.bind("tcp://*:55556")
@@ -54,34 +56,45 @@ class CospyManager:
 
         self._node_sockets[node_name].send_json(msg)
 
+    def action(self, msg):
+
+        if msg["action_at"] <= time.time():
+
+            logging.info("Received message %r" % msg)
+
+            topic = msg["topic"]
+
+            if topic in self._manager_listeners:
+                self._manager_listeners[topic](msg)
+            else:
+                if topic in self._listeners:
+                    for nodes_listening in self._listeners[topic]:
+                        logging.info("Sending %r to %s" % (msg, nodes_listening))
+                        self._node_sockets[nodes_listening].send_json(msg)
+                else:
+                    logging.info("No one listening to %s" % msg)
+
+        else:
+            self.backlog.appendleft(msg)
+
     def run(self):
 
         logging.info("Starting queue management")
 
         try:
-
             while self.running:
                 for node_name in list(self._node_sockets):
                     try:
                         soc = self._node_sockets[node_name]
                         msg = soc.recv_json(flags=zmq.NOBLOCK)
                         msg["source"] = node_name
+                        self.action(msg)
 
-                        if msg["action_at"] <= time.time():
-                            logging.info("Received message %r" % msg)
-
-                            topic = msg["topic"]
-
-                            if topic in self._manager_listeners:
-                                self._manager_listeners[topic](msg)
-                            else:
-                                if topic in self._listeners:
-                                    for nodes_listening in self._listeners[topic]:
-                                        logging.info("Sending %r to %s" % (msg, nodes_listening))
-                                        self._node_sockets[nodes_listening].send_json(msg)
-                                else:
-                                    logging.info("No one listening to %s" % msg)
                     except zmq.Again:
                         pass
+
+                    if self.backlog:
+                        self.action(self.backlog.pop())
+
         finally:
             self.stop()
