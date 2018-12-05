@@ -15,10 +15,10 @@ def message(topic, data=None, delay=0):
 
 
 def get_node():
-    global node
-    if node is None:
-        node = CospyNode(node_name)
-    return node
+    global nodes
+    if len(nodes) == 0:
+        nodes.append(CospyNode(node_name))
+    return nodes[-1]
 
 
 def listen_to(topic, callback):
@@ -44,14 +44,17 @@ def set_node_name(new_name):
 
 
 def new_node(new_name):
-    return CospyNode(new_name)
+    global nodes
+    nodes.append(CospyNode(new_name))
+    return get_node()
 
 
 def stop():
-    get_node().stop()
+    for node in nodes:
+        node.stop()
 
 
-node = None
+nodes = []
 node_name = sys.argv[0]
 
 set_logging_level(logging.INFO)
