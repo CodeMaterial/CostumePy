@@ -1,7 +1,8 @@
 import unittest
 import CostumePy
 import time
-from callback_helpers import CallbackReceiver
+from importlib import reload
+from tests.callback_helpers import CallbackReceiver
 
 
 cr = CallbackReceiver()
@@ -10,11 +11,12 @@ cr = CallbackReceiver()
 class MultiNodeTest(unittest.TestCase):
 
     def test_1_init(self):
+        reload(CostumePy)
         cr.node_a = CostumePy.new_node("node_a")
         cr.node_b = CostumePy.new_node("node_b")
 
     def test_2_listen(self):
-        cr.node_a.listen_to("multi_node_test", cr.func)
+        cr.node_a.listen("multi_node_test", cr.func)
 
     def test_3_broadcast(self):
         cr.node_b.broadcast("multi_node_test", data=True)
@@ -27,5 +29,5 @@ class MultiNodeTest(unittest.TestCase):
         self.assertEqual(msg["topic"], "multi_node_test", msg="Incorrect topic: %s" % msg["topic"])
         self.assertLessEqual(msg["action_at"], time.time(), msg="Message was actioned too early")
 
-    def test_4_stop(self):
-        CostumePy.stop()
+    def test_4_quit(self):
+        CostumePy.quit()

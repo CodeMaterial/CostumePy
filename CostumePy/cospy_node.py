@@ -40,19 +40,21 @@ class CospyNode:
             time.sleep(1)
             return self._request_socket_ip(retries=retries+1)
 
-        with self._zmq_context.socket(zmq.REQ) as ip_socket:
-            ip_socket.connect("tcp://localhost:55556")
-            ip_socket.send_string(self.name)
+        ip_socket = self._zmq_context.socket(zmq.REQ)
+        ip_socket.connect("tcp://localhost:55556")
+        ip_socket.send_string(self.name)
 
-            ip_address = ip_socket.recv().decode('UTF-8')
+        ip_address = ip_socket.recv().decode('UTF-8')
 
-            return ip_address
+        ip_socket.close()
 
-    def stop(self):
+        return ip_address
+
+    def quit(self):
         self.running = False
         self._callback_listener.join()
 
-    def listen_to(self, topic, callback):
+    def listen(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)
 
         if topic not in self.listening_to:

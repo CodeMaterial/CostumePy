@@ -2,7 +2,7 @@ import unittest
 import CostumePy
 import time
 from importlib import reload
-from callback_helpers import CallbackReceiver
+from tests.callback_helpers import CallbackReceiver
 
 cr = CallbackReceiver()
 
@@ -11,7 +11,7 @@ class SendReceiveTest(unittest.TestCase):
 
     def test_1_listen(self):
         reload(CostumePy)
-        CostumePy.listen_to("test", cr.func)
+        CostumePy.listen("test", cr.func)
 
     def test_2_broadcast(self):
         CostumePy.broadcast("test", data=True)
@@ -24,15 +24,15 @@ class SendReceiveTest(unittest.TestCase):
         self.assertEqual(msg["topic"], "test", msg="Incorrect topic: %s" % msg["topic"])
         self.assertLessEqual(msg["action_at"], time.time(), msg="Message was actioned too early")
 
-    def test_4_stop(self):
-        CostumePy.stop()
+    def test_4_quit(self):
+        CostumePy.quit()
 
 
 class DelayTest(unittest.TestCase):
 
     def test_1_listen(self):
         reload(CostumePy)
-        CostumePy.listen_to("test", cr.func)
+        CostumePy.listen("test", cr.func)
 
     def test_2_broadcast(self):
         CostumePy.broadcast("test", data=True, delay=3)
@@ -45,15 +45,15 @@ class DelayTest(unittest.TestCase):
         self.assertEqual(msg["topic"], "test", msg="Incorrect topic: %s" % msg["topic"])
         self.assertLessEqual(msg["action_at"], time.time(), msg="Message was actioned too early")
 
-    def test_4_stop(self):
-        CostumePy.stop()
+    def test_4_quit(self):
+        CostumePy.quit()
 
 
 class BulkTest(unittest.TestCase):
 
     def test_1_listen(self):
         reload(CostumePy)
-        CostumePy.listen_to("test", cr.func)
+        CostumePy.listen("test", cr.func)
 
     def test_2_broadcast(self):
         for _ in range(100):
@@ -64,5 +64,5 @@ class BulkTest(unittest.TestCase):
         self.assertEqual(type(msg), list, msg="Message timeout reached. No messages received")
         self.assertEqual(len(msg), 100)
 
-    def test_4_stop(self):
-        CostumePy.stop()
+    def test_4_quit(self):
+        CostumePy.quit()

@@ -4,6 +4,10 @@ import logging
 from CostumePy.cospy_node import CospyNode
 
 
+nodes = []
+node_name = sys.argv[0]
+
+
 def message(topic, data=None, delay=0):
     created = time.time()
     return {"source": None,
@@ -21,8 +25,8 @@ def get_node():
     return nodes[-1]
 
 
-def listen_to(topic, callback):
-    get_node().listen_to(topic, callback)
+def listen(topic, callback):
+    get_node().listen(topic, callback)
 
 
 def broadcast(topic, data=None, delay=0):
@@ -49,12 +53,10 @@ def new_node(new_name):
     return get_node()
 
 
-def stop():
+def quit():
+    global nodes
     for node in nodes:
-        node.stop()
+        node.quit()
 
-
-nodes = []
-node_name = sys.argv[0]
 
 set_logging_level(logging.INFO)
