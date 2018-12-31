@@ -10,63 +10,32 @@ class CospyNode:
 
     def __init__(self, name):
         self.name = name
-        self.listening_to = {"_success": [self._success], "_new_node": self.new_broadcast_receiver}
-        self.broadcasting = {}  # topics : [ip]
-        self.sockets = {}  # {ip:sock}
+        self.topic2callback = {"_network_update": self.network_update}  # {topic:callback}
+        self.topic2addresses = {}  # {topic:[address]}
+        self.incoming_addresses = []  # ip's
+        self.address2socket = {}  # {ip:sock}
+
         self.running = True
-        self.last_success = None
+
+        self.update_pending = 0
 
         self._zmq_context = zmq.Context()
 
         self.manager_sock = self._zmq_context.socket(zmq.PAIR)
 
         try:
-            address = self._request_socket_ip()
-            self.manager_sock.connect(address)
+            self._connect_to_manager(self.manager_sock)
         except ConnectionRefusedError:
             raise
 
-        self._callback_listener = threading.Thread(target=self._listen_for_callbacks)
-        self._callback_listener.start()
+        self.listener_thread = threading.Thread(target=self._listen_for_callbacks)
+        self.listener_thread.start()
 
-    def new_broadcast_receiver(self, msg):
-        ip_address = msg["data"]["address"]
-        topic = msg["data"]["topic"]
-        self.broadcasting[topic].append(ip_address)
-        if ip_address not in self.sockets:
-            self.sockets[ip_address] = self._zmq_context.socket(zmq.PAIR)
-            self.sockets[ip_address].connect(ip_address)
+    def _connect_to_manager(self, manager_sock, retries=0, max_retries=5):
 
-    def server_request(self, msg):
-        msg["source"] = self.name
-        self.manager_sock.send_json(msg)
-        self.wait_for_success()
+        print("connecting to manager...")
 
-    def broadcast(self, msg):
-        if msg["topic"] in self.broadcasting:
-            pass
-        else:
-            msg["topic"] = []
-            msg = CostumePy.message("new_broadcast", data=msg["topic"])
-            self.server_request(msg)
-
-    def listen_to(self, topic, callback):
-        logging.info("Setting up listening callbacks for %s" % topic)
-
-        if topic not in self.listening_to:
-            logging.info("Topic %s is not currently being listened to by this node, initialising." % topic)
-            self.listening_to[topic] = []
-            msg = CostumePy.message("_listen_request", data=)
-            self.server_request(msg)
-
-        self.listening_to[topic].append(callback)
-        listen_msg = CostumePy.message("_listen_for", data=topic)
-        self.broadcast_message(listen_msg)
-        self.wait_for_success(listen_msg)
-
-    def _request_socket_ip(self, retries=0):
-
-        if retries > 5:
+        if retries > max_retries:
             raise ConnectionRefusedError("Cannot contact manager, has it been started?")
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -75,47 +44,106 @@ class CospyNode:
         if not manager_available:
             logging.info("Cannot connect to manager, retrying...")
             time.sleep(1)
-            return self._request_socket_ip(retries=retries+1)
+            return self._connect_to_manager(manager_sock, retries=retries+1)
 
-        with self._zmq_context.socket(zmq.REQ) as ip_socket:
-            ip_socket.connect("tcp://localhost:55556")
-            ip_socket.send_string(self.name)
+        with self._zmq_context.socket(zmq.REQ) as manager_request_socket:
+            manager_request_socket.connect("tcp://localhost:55556")
+            manager_request_socket.send_string(self.name)
 
-            ip_address = ip_socket.recv().decode('UTF-8')
+            ip_address = manager_request_socket.recv().decode('UTF-8')
 
-            return ip_address
+        manager_sock.connect(ip_address)
+
+        print("connected to manager")
+
+    def network_update(self, msg):
+
+        print("recieved network update request", msg)
+
+        self.topic2addresses = msg["data"]["outgoing"]  # {"outgoing": topic2ip, "incoming": listening_ips})
+
+        for topic in self.topic2addresses:
+            for address in self.topic2addresses[topic]:
+                if address not in self.address2socket:
+                    soc = zmq.Context().socket(zmq.PAIR)
+                    soc.bind("tcp://*:%i" % address)
+                    self.address2socket[address] = soc
+
+        self.incoming_addresses = msg["data"]["incoming"]
+
+        for address in self.incoming_addresses:
+            if address not in self.address2socket:
+                soc = self._zmq_context.socket(zmq.PAIR)
+                soc.connect("tcp://localhost:" + address)
+
+                self.address2socket[address] = soc
+
+        self.update_pending -= 1
+
+    def update(self):
+
+        print("Updating network")
+
+        self.update_pending += 1
+
+        msg = CostumePy.message("_state_update", data=self.state())
+        msg["source"] = self.name
+        self.manager_sock.send_json(msg)
+
+        print("waiting for server update")
+        while self.update_pending:
+            time.sleep(0.01)
+        print("server update recieved")
+
+    def state(self):
+        state = {"listening": list(self.topic2callback.keys()), "broadcasting": list(self.topic2addresses.keys())}
+        print("retrieving state", state)
+        return state
+
+    def broadcast(self, topic, data=None, delay=0):
+
+        msg = CostumePy.message(topic, data=data, delay=delay)
+        msg["source"] = self.name
+
+        print("broadcsating message", msg)
+
+        if msg["topic"] not in self.topic2addresses:
+            print("unexpected topic")
+            self.update()
+
+        if msg["topic"] in self.topic2addresses:
+            for address in self.topic2addresses[msg["topic"]]:
+                print("sending %r to %r" % (msg, address))
+                sock = self.address2socket[address]
+                sock.send_json(msg)
+        else:
+            print("no known targets for topic %r" % msg["topic"])
+
+    def listen_to(self, topic, callback):
+
+        print("listening to ", topic, callback)
+
+        self.topic2callback[topic] = callback
+        self.update()
 
     def stop(self):
+        death_msg = CostumePy.message("_death")
+        self.manager_sock.send_json(death_msg)
+
         self.running = False
-        self._callback_listener.join()
-
-
-
-    def _success(self, msg):
-        orig_msg = msg["data"]
-        self.last_success = orig_msg
-
-    def wait_for_success(self, msg, timeout=5):
-        logging.info("Waiting on response")
-        start = time.time()
-        while (self.last_success != msg) and (time.time() - start <= timeout):
-            time.sleep(.1)
-
-        if self.last_success != msg:
-            raise ConnectionAbortedError("Timeout reached whilst waiting for message %r" % msg)
-        else:
-            logging.info("Response recieved")
+        self.listener_thread.join()
 
     def _listen_for_callbacks(self):
 
-        logging.info("Listening for callbacks")
         while self.running:
-            try:
-                msg = self.manager_sock.recv_json(flags=zmq.NOBLOCK)
-                if msg["topic"] in self.listening_to:
-                    callbacks = self.listening_to[msg["topic"]]
-                    for callback in callbacks:
-                        callback(msg)
+            time.sleep(.5)
 
-            except zmq.Again:
-                pass
+            for soc in [self.address2socket[address] for address in self.incoming_addresses] + [self.manager_sock]:
+                try:
+                    msg = soc.recv_json(flags=zmq.NOBLOCK)
+                    print("recieved message", msg)
+                    if msg["topic"] in self.topic2callback:
+                        callback = self.topic2callback[msg["topic"]]
+                        callback(msg)
+                except zmq.Again:
+                    pass
