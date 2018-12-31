@@ -39,7 +39,7 @@ If you're using a Raspberry Pi or a machine with both Python 2 and 3 installed, 
 To use CostumePy, you first have to launch the manager. To start the manager run:
 
 ```commandline
-python -m CostumePy.launch_manager
+python -m CostumePy.server
 ```
 
 To run this in the background on a Linux system, append the command with an ``` &```
