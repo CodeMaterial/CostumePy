@@ -16,7 +16,9 @@ class CospyManager:
         self._manager_listeners = {"_listen_for": self.register_listener}
         self.backlog = deque()
 
-        self.request_socket = zmq.Context().socket(zmq.REP)
+        self.context = zmq.Context()
+
+        self.request_socket = self.context.socket(zmq.REP)
         self.request_socket.bind("tcp://*:55556")
 
         self.available_ip = 55557
@@ -35,7 +37,7 @@ class CospyManager:
                 node_name = self.request_socket.recv_string(flags=zmq.NOBLOCK)
                 address = "tcp://localhost:%i" % self.available_ip
                 self.request_socket.send_string(address)
-                soc = zmq.Context().socket(zmq.PAIR)
+                soc = self.context.socket(zmq.PAIR)
                 soc.bind("tcp://*:%i" % self.available_ip)
                 self._node_sockets[node_name] = soc
                 self.available_ip += 1

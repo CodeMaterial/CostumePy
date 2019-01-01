@@ -13,5 +13,5 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/codematerial/CostumePy",
     packages=setuptools.find_packages(),
-    install_requires =["zmq"]
+    install_requires=["zmq"]
 )
