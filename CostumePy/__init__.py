@@ -53,6 +53,10 @@ def new_node(new_name):
     return get_node()
 
 
+def get_ui():
+    return get_node().ui
+
+
 def quit():
     global nodes
     for node in nodes:

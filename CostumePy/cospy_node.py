@@ -2,6 +2,7 @@ import threading
 import logging
 import zmq
 import CostumePy
+from CostumePy.UI import UI
 import socket
 import time
 
