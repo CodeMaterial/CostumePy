@@ -10,21 +10,28 @@ matrix:
       - choco install python3
       - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
       - python -m ensurepip --upgrade
+      stages:
+      - stage: Windows_Server_Connection_Test
+        script: python -m unittest tests/test_server_connection.py
+
+      - stage: Windows_Main_Test_Suite
+        script: python -m unittest discover -s tests -v
+
+      - stage: Windows_Duplicate_Test_Suite
+        script: python -m unittest discover -s tests -v
+
 
     - os: linux
       python: "3.6"
+      stages:
+      - stage: Linux_Server_Connection_Test
+        script: python -m unittest tests/test_server_connection.py
 
+      - stage: Linux_Main_Test_Suite
+        script: python -m unittest discover -s tests -v
 
-jobs:
-  include:
-  - stage: Server_Connection_Test
-    script: python -m unittest tests/test_server_connection.py
-
-  - stage: Main_Test_Suite
-    script: python -m unittest discover -s tests -v
-
-  - stage: Duplicate_Test_Suite
-    script: python -m unittest discover -s tests -v
+      - stage: Linux_Duplicate_Test_Suite
+        script: python -m unittest discover -s tests -v
 
 
 install:
