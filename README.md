@@ -34,9 +34,9 @@ python setup.py install
 
 If you're using a Raspberry Pi or a machine with both Python 2 and 3 installed, replace ```python``` with ```python3```
 
-## Cospy_Manager
+## CostumePy Server
 
-To use CostumePy, you first have to launch the manager. To start the manager run:
+To use CostumePy, you first have to launch the server. To start the server run:
 
 ```commandline
 python -m CostumePy.server
@@ -44,7 +44,7 @@ python -m CostumePy.server
 
 To run this in the background on a Linux system, append the command with an ``` &```
 
-If you try to use CostumePy without the manager, you will get the following error when trying to broadcast or listen to a topic:
+If you try to use CostumePy without the server, you will get the following error when trying to broadcast or listen to a topic:
 
 ```commandline
   File "/usr/local/lib/python3.5/dist-packages/CostumePy-0.0.1-py3.5.egg/CostumePy/cospy_node.py", line 33, in _request_socket_ip
