@@ -14,6 +14,7 @@ class CospyNode:
         self.listening_to = {"_success": [self._success]}
         self.running = True
         self.last_success = None
+        self.ui = UI(self)
 
         self._zmq_context = zmq.Context()
 

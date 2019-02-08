@@ -1,6 +1,6 @@
 import CostumePy
 
-from CostumePy.UI import Button, Slider, Dropdown
+from CostumePy.UI import Button
 
 
 class Radiator:
@@ -14,21 +14,14 @@ class Radiator:
         self.mode = "Constant"
         self.target_temp = 20
 
-    def set_listeners(self):
+        topic = "POWER_RAD_%i" % number
 
-        self.node.listen("POWER", self.set_power)
-        self.node.listen("MODE", self.set_mode)
-        self.node.listen("TEMP_TARGET", self.set_target_temp)
+        self.node.listen(topic, self.set_power)
 
-    def setup_ui(self):
+        on_button = Button("Power On", topic, data=True)
+        off_button = Button("Power Off", topic, data=False)
 
-        on_button = Button("Power On", "POWER", data=True)
-
-        off_button = Button("Power Off", "POWER", data=False)
-        mode_dropdown = Dropdown("Mode", "MODE", data_options=["Constant", "Pulsing", "Energy Saving"])
-        thermostat_slider = Slider("Temperature", "TEMP_TARGET", data_min=10, data_max=30)
-
-        self.ui.add_elements(on_button, off_button, mode_dropdown, thermostat_slider)
+        self.ui.add_elements(on_button, off_button)
 
     def set_power(self, msg):
 
@@ -40,20 +33,11 @@ class Radiator:
             print("Turning off radiator")
             self.power = False
 
-        print("the radiator is now %s" % ("on" if self.power else "off"))
+        print("the radiator %s is now %s" % (("on" if self.power else "off"), self.node.name))
 
-    def set_mode(self, msg):
-        print("Setting the radiator mode to %s" % msg.data)
-        self.mode = msg.data
-
-    def set_target_temp(self, msg):
-        print("Setting the radiator mode to %s" % msg.data)
-        self.target_temp = msg.data
 
 
 if __name__ == "__main__":
 
-    for i in range(1):
+    for i in range(4):
         radiator = Radiator(i)
-        radiator.set_listeners()
-        radiator.setup_ui()

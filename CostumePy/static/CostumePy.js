@@ -2,7 +2,7 @@
 const app = new Vue({
   el: "#app1",
   data: {
-    nodes: []
+    nodes: {}
   },
   methods: {
 
@@ -22,21 +22,43 @@ const app = new Vue({
 
       }
   },
+    computed: {
+        grid_names: function () {
+            cols = 3;
+            node_names = Object.keys(this.nodes);
+            rows = Math.ceil(node_names.length/cols);
+            grid = [];
+            for (var i=0; i<rows; i++){
+                row = node_names.slice(i*cols, i*cols+cols);
+                grid.push(row)
+            }
+            return grid;
+        },
+        node_names: function () {
+            return Object.keys(this.nodes)
+        }
+    },
   template: `
-    <div>
-      <div v-for="(node, node_name) in nodes" class="panel panel-primary">
-        <div class="panel-heading">{{node_name}}</div>
-        <div class="panel-body">
-          <div v-for="(ui_element, ui_element_name) in node">
-            <button v-if="ui_element.type=='Button'" class="btn btn-default" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
-                {{ui_element_name}}
-            </button>
-          </div>  
-        </div>
+    <div class="container-fluid">
+      <div v-for="row in grid_names" class="row">
+          <div v-for="node_name in row" class="col-sm-4">
+              <div class="panel panel-primary">
+                <div class="panel-heading">{{node_name}}</div>
+                <div class="panel-body">
+                  <div v-for="(ui_element, ui_element_name) in nodes[node_name]">
+                    <button v-if="ui_element.type=='Button'" class="btn btn-default" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
+                        {{ui_element_name}}
+                    </button>
+                  </div>  
+                </div>
+              </div>
+          </div>
       </div>
     </div>
   `
 });
+
+
 
 var server = new EventSource('/state_stream');
 server.onmessage = CostumePy_update;

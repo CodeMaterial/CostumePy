@@ -2,6 +2,7 @@ import sys
 import time
 import logging
 from CostumePy.cospy_node import CospyNode
+from CostumePy.UI import Button
 
 
 nodes = []
@@ -53,14 +54,30 @@ def new_node(new_name):
     return get_node()
 
 
-def get_ui():
-    return get_node().ui
-
-
 def quit():
     global nodes
     for node in nodes:
         node.quit()
+
+
+def add_button(name, topic, data=None):
+
+    button = Button(name, topic, data=data)
+
+    get_node().ui.add_elements(button)
+
+
+def add_state(name, topic):
+    raise NotImplementedError
+
+
+def add_slider(name, topic, min_val=0, max_val=1, data=None):
+    raise NotImplementedError
+
+
+def add_dropdown(name, topic, data=None):
+    raise NotImplementedError
+
 
 
 set_logging_level(logging.INFO)
