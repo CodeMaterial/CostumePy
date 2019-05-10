@@ -46,7 +46,7 @@ const app = new Vue({
                 <div class="panel-heading">{{node_name}}</div>
                 <div class="panel-body">
                   <div v-for="(ui_element, ui_element_name) in nodes[node_name]">
-                    <button v-if="ui_element.type=='Button'" class="btn btn-default" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
+                    <button v-if="ui_element.type=='Button'" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element_name}}
                     </button>
                   </div>  

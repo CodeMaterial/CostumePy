@@ -21,15 +21,22 @@ class UI:
 
         self._update()
 
+    def set_elements(self, *elements):
+        self.elements = {}
+        self.add_elements(*elements)
+
     def remove_elements(self, *element_ids):
         for element_id in element_ids:
             del self.elements[element_id]
+            print("removed element ", element_id)
+        self._update()
 
 class Button:
-    def __init__(self, element_id, topic, data=None):
+    def __init__(self, element_id, topic, data=None, button_class="default"):
         self.element_id = element_id
         self.topic = topic
         self.data = data
+        self.button_class = "btn btn-" + button_class
 
     def serialise(self):
-        return {"topic": self.topic, "data": self.data}
+        return {"topic": self.topic, "data": self.data, "button_class": self.button_class}
