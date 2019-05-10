@@ -55,6 +55,7 @@ class CospyNode:
     def quit(self):
         self.running = False
         self._callback_listener.join()
+        quit()  # WARNING. If there are multiple nodes per file this will kill all of them. TODO
 
     def listen(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)

@@ -43,7 +43,12 @@ const app = new Vue({
       <div v-for="row in grid_names" class="row">
           <div v-for="node_name in row" class="col-sm-4">
               <div class="panel panel-primary">
-                <div class="panel-heading">{{node_name}}</div>
+                <div class="panel-heading">
+                    {{node_name}}
+                    <button class="pull-right close" type="button" v-on:click="on_click('_kill', node_name)">
+                        &times;
+                    </button>
+                </div>
                 <div class="panel-body">
                   <div v-for="(ui_element, ui_element_name) in nodes[node_name]">
                     <button v-if="ui_element.type=='Button'" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">

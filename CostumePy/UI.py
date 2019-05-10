@@ -32,11 +32,11 @@ class UI:
         self._update()
 
 class Button:
-    def __init__(self, element_id, topic, data=None, button_class="default"):
+    def __init__(self, element_id, topic, data=None, button_class="btn-default"):
         self.element_id = element_id
         self.topic = topic
         self.data = data
-        self.button_class = "btn btn-" + button_class
+        self.button_class = "btn " + button_class
 
     def serialise(self):
         return {"topic": self.topic, "data": self.data, "button_class": self.button_class}

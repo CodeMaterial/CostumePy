@@ -8,6 +8,12 @@ all_states = {}
 
 update_pending = False
 
+def kill(msg):
+    global all_states, update_pending
+    print("recieved %r" % msg)
+    node_name = msg["data"]
+    del all_states[node_name]
+    update_pending = True
 
 def update_ui(msg):
     global all_states, update_pending
@@ -21,6 +27,7 @@ def update_ui(msg):
 CostumePy.set_node_name("UI")
 
 CostumePy.listen("_UI_UPDATE", update_ui)
+CostumePy.listen("_kill", kill)
 
 app = Flask(__name__)
 

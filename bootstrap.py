@@ -4,13 +4,15 @@ import CostumePy
 import threading
 import time
 import subprocess
-import sys, os
+import sys
+import os
 
 class Bootstrap:
 
     def __init__(self, node_names):
 
         self.node = CostumePy.new_node("bootstrap")
+        self.running_nodes = {}
         self.node.listen("launch", self.launch_node)
         self.python_interpreter = sys.executable
         self.root_dir, _ = os.path.split(os.path.abspath(__file__))
@@ -22,11 +24,10 @@ class Bootstrap:
     def launch_node(self, msg):
         node_name = msg["data"]
         self.node_names.remove(node_name)
-        self.node.ui.remove_elements("launch %s" % node_name)
         file_location = self.root_dir + "/" + node_name
         i = [self.python_interpreter, file_location, "&"]
         print("launching %r" % i)
-        subprocess.Popen(i)
+        self.running_nodes[node_name] = subprocess.Popen(i)
         print("Launched")
 
 

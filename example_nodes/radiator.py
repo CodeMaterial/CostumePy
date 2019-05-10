@@ -15,24 +15,24 @@ class Radiator:
 
         self.node.listen(power_command, self.set_power)
 
-        self.off_button = Button("Power: On", power_command, data=True, button_class="success")
-        self.on_button = Button("Power: Off", power_command, data=False, button_class="danger")
+        self.on_button = Button("Power: On", power_command, data=False, button_class="btn-success")
+        self.off_button = Button("Power: Off", power_command, data=True, button_class="btn-danger")
 
-        self.node.ui.set_elements(self.on_button)
+        self.node.ui.set_elements(self.off_button)
 
     def set_power(self, msg):
 
         if msg["data"] == True:
             print("Turning on radiator")
             self.power = True
-            self.node.ui.set_elements(self.off_button)
+            self.node.ui.set_elements(self.on_button)
             print("The radiator is now on")
 
 
         elif msg["data"] == False:
             print("Turning off radiator")
             self.power = False
-            self.node.ui.set_elements(self.on_button)
+            self.node.ui.set_elements(self.off_button)
             print("The radiator is now off")
 
 
