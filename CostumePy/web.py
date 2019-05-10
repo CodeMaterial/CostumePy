@@ -3,21 +3,23 @@ import json
 from flask import *
 
 import CostumePy
+import logging
 
 all_states = {}
 
 update_pending = False
 
-def kill(msg):
+
+def death(msg):
     global all_states, update_pending
-    print("recieved %r" % msg)
-    node_name = msg["data"]
+    node_name = msg["source"]
+    logging.info("Node %s has died" % node_name)
     del all_states[node_name]
     update_pending = True
 
+
 def update_ui(msg):
     global all_states, update_pending
-    print("recieved %r" % msg)
     node_name = msg["source"]
     node_state = msg["data"]
     all_states[node_name] = node_state
@@ -27,7 +29,7 @@ def update_ui(msg):
 CostumePy.set_node_name("UI")
 
 CostumePy.listen("_UI_UPDATE", update_ui)
-CostumePy.listen("_kill", kill)
+CostumePy.listen("death", death)
 
 app = Flask(__name__)
 
@@ -53,7 +55,7 @@ def broadcast():
     try:
         data = json.loads(request.form['data'])
     except:
-        print("can't parse form data, reading in raw")
+        logging.warning("can't parse form data, reading in raw")
         data = request.form['data']
 
     if data is None:

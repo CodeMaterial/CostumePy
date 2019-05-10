@@ -1,3 +1,5 @@
+import logging
+
 class UI:
     def __init__(self, node):
 
@@ -28,7 +30,7 @@ class UI:
     def remove_elements(self, *element_ids):
         for element_id in element_ids:
             del self.elements[element_id]
-            print("removed element ", element_id)
+            logging.info("removed element ", element_id)
         self._update()
 
 class Button:

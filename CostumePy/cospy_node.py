@@ -29,6 +29,8 @@ class CospyNode:
         self._callback_listener = threading.Thread(target=self._listen_for_callbacks)
         self._callback_listener.start()
 
+        self.listen("_kill", self.check_kill)
+
     def _request_socket_ip(self, retries=0):
 
         if retries > 5:
@@ -52,10 +54,12 @@ class CospyNode:
 
         return ip_address
 
+    def check_kill(self, msg):
+        if msg["data"] == self.name:
+            self.quit()
+
     def quit(self):
         self.running = False
-        self._callback_listener.join()
-        quit()  # WARNING. If there are multiple nodes per file this will kill all of them. TODO
 
     def listen(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)
@@ -97,6 +101,8 @@ class CospyNode:
 
             except zmq.Again:
                 pass
+        logging.info("Callback thread terminated")
+        self.broadcast("death")
 
     def broadcast_message(self, msg):
         msg["source"] = self.name

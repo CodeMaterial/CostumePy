@@ -38,7 +38,13 @@ class CospyManager:
                 address = "tcp://localhost:%i" % self.available_ip
                 self.request_socket.send_string(address)
                 soc = self.context.socket(zmq.PAIR)
-                soc.bind("tcp://*:%i" % self.available_ip)
+                for i in range(10):
+                    try:
+                        soc.bind("tcp://*:%i" % self.available_ip)
+                        break
+                    except zmq.error.ZMQError:  # TODO make this recursive, or semi recursive
+                        logging.error("Can't assign socket number %s, iterating" % self.available_ip)
+                        self.available_ip += 1
                 self._node_sockets[node_name] = soc
                 self.available_ip += 1
             except zmq.Again:
