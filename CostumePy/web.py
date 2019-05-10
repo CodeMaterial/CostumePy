@@ -43,7 +43,11 @@ def state_stream():
 @app.route('/broadcast', methods=['POST'])
 def broadcast():
     topic = request.form['topic']
-    data = json.loads(request.form['data'])
+    try:
+        data = json.loads(request.form['data'])
+    except:
+        print("can't parse form data, reading in raw")
+        data = request.form['data']
 
     if data is None:
         CostumePy.broadcast(topic)

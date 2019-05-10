@@ -21,6 +21,9 @@ class UI:
 
         self._update()
 
+    def remove_elements(self, *element_ids):
+        for element_id in element_ids:
+            del self.elements[element_id]
 
 class Button:
     def __init__(self, element_id, topic, data=None):

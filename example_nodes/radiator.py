@@ -33,7 +33,7 @@ class Radiator:
             print("Turning off radiator")
             self.power = False
 
-        print("the radiator %s is now %s" % (("on" if self.power else "off"), self.node.name))
+        print("the radiator %s is now %s" % (self.node.name, ("on" if self.power else "off")))
 
 
 
