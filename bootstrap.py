@@ -44,4 +44,4 @@ if __name__ == "__main__":
     web_thread = threading.Thread(target=web.app.run)
     web_thread.start()
 
-    b = Bootstrap(["example_nodes/radiator.py", "node_2"])
+    b = Bootstrap(["example_nodes/radiator.py"])
