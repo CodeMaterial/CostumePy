@@ -12,6 +12,8 @@ class UI:
             element = self.elements[element_id]
             state[element_id] = element.serialise()
             state[element_id]["type"] = element.__class__.__name__
+
+        state["running"] = self.node.running
         self.node.broadcast("_UI_UPDATE", data=state)
 
     def add_elements(self, *elements):

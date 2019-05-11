@@ -5,7 +5,7 @@ import CostumePy
 from CostumePy.UI import UI
 import socket
 import time
-
+import atexit
 
 class CospyNode:
 
@@ -30,6 +30,8 @@ class CospyNode:
         self._callback_listener.start()
 
         self.listen("_kill", self.check_kill)
+
+        atexit.register(self.death)
 
     def _request_socket_ip(self, retries=0):
 
@@ -58,8 +60,13 @@ class CospyNode:
         if msg["data"] == self.name:
             self.quit()
 
+    def death(self):
+        self.broadcast("death")
+        logging.info("%s has died gracefully" % self.name)
+
     def quit(self):
         self.running = False
+        self.ui._update()
 
     def listen(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)
@@ -102,7 +109,6 @@ class CospyNode:
             except zmq.Again:
                 pass
         logging.info("Callback thread terminated")
-        self.broadcast("death")
 
     def broadcast_message(self, msg):
         msg["source"] = self.name

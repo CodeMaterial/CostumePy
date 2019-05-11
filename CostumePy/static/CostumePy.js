@@ -45,8 +45,11 @@ const app = new Vue({
               <div class="panel panel-primary">
                 <div class="panel-heading">
                     {{node_name}}
-                    <button class="pull-right close" type="button" v-on:click="on_click('_kill', node_name)">
+                    <button v-if="nodes[node_name].running" class="pull-right close" type="button" v-on:click="on_click('_kill', node_name)">
                         &times;
+                    </button>
+                    <button v-else class="pull-right close" type="button" disabled>
+                        Shutting down
                     </button>
                 </div>
                 <div class="panel-body">
