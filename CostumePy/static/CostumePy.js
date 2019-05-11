@@ -48,13 +48,13 @@ const app = new Vue({
                     <button v-if="nodes[node_name].running" class="pull-right close" type="button" v-on:click="on_click('_kill', node_name)">
                         &times;
                     </button>
-                    <button v-else class="pull-right close" type="button" disabled>
-                        Shutting down
-                    </button>
+                    <span v-else class="pull-right badge">
+                        Shutting Down ...
+                    </span>
                 </div>
                 <div class="panel-body">
                   <div v-for="(ui_element, ui_element_name) in nodes[node_name]">
-                    <button v-if="ui_element.type=='Button'" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
+                    <button v-if="ui_element.type=='Button'" v-bind:disabled="!nodes[node_name].running" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element_name}}
                     </button>
                   </div>  
