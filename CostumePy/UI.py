@@ -35,12 +35,32 @@ class UI:
             logging.info("removed element ", element_id)
         self._update()
 
-class Button:
-    def __init__(self, element_id, topic, data=None, button_class="btn-default"):
+    def get_element(self, element_id):
+        return self.elements[element_id]
+
+    def replace(self, element_id, element):
+        self.elements[element_id] = element
+        self._update()
+
+
+class Text:
+
+    def __init__(self, element_id, text="None", text_class="text-justify"):
         self.element_id = element_id
-        self.topic = topic
-        self.data = data
-        self.button_class = "btn " + button_class
+        self.text = text
+        self.text_class = text_class
 
     def serialise(self):
-        return {"topic": self.topic, "data": self.data, "button_class": self.button_class}
+        return {"text": self.text, "text_class": self.text_class}
+
+
+class Button:
+    def __init__(self, element_id, text, topic, data=None, button_class="btn-default"):
+        self.element_id = element_id
+        self.text = text
+        self.topic = topic
+        self.data = data
+        self.button_class = button_class
+
+    def serialise(self):
+        return {"text": self.text, "topic": self.topic, "data": self.data, "button_class": "btn " + self.button_class}

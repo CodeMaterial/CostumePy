@@ -21,7 +21,7 @@ class Bootstrap:
         self.node_names = node_names
 
         for node_name in self.node_names:
-            self.node.ui.add_elements(Button("launch %s" % node_name, "launch", data=node_name))
+            self.node.ui.add_elements(Button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name))
 
     def launch_file(self, msg):
         file_name = msg["data"]
