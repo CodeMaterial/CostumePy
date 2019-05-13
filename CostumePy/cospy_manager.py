@@ -35,6 +35,11 @@ class CospyManager:
         while self.running:
             try:
                 node_name = self.request_socket.recv_string(flags=zmq.NOBLOCK)
+
+                if node_name in self._node_sockets:
+                    logging.error("Node already running %s" % node_name)
+                    continue
+
                 address = "tcp://localhost:%i" % self.available_ip
                 self.request_socket.send_string(address)
                 soc = self.context.socket(zmq.PAIR)
@@ -47,7 +52,7 @@ class CospyManager:
                         self.available_ip += 1
                 self._node_sockets[node_name] = soc
                 self.available_ip += 1
-            except zmq.Again:
+            except:
                 pass
 
     def register_listener(self, msg):
@@ -64,6 +69,10 @@ class CospyManager:
 
         self._node_sockets[node_name].send_json(msg)
 
+    def delete_socket(self, node_name):
+        self._node_sockets[node_name].close()
+        del self._node_sockets[node_name]
+
     def action(self, msg):
 
         if msg["action_at"] <= time.time():
@@ -72,13 +81,17 @@ class CospyManager:
 
             topic = msg["topic"]
 
+            if topic == "death":
+                self.delete_socket(msg["source"])
+
             if topic in self._manager_listeners:
                 self._manager_listeners[topic](msg)
             else:
                 if topic in self._listeners:
                     for nodes_listening in self._listeners[topic]:
-                        logging.info("Sending %r to %s" % (msg, nodes_listening))
-                        self._node_sockets[nodes_listening].send_json(msg)
+                        if nodes_listening in self._node_sockets:
+                            logging.info("Sending %r to %s" % (msg, nodes_listening))
+                            self._node_sockets[nodes_listening].send_json(msg, zmq.NOBLOCK)
                 else:
                     logging.info("No one listening to %s" % msg)
 

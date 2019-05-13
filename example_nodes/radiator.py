@@ -1,4 +1,6 @@
 import CostumePy
+import time
+
 
 class Radiator:
 
@@ -10,54 +12,35 @@ class Radiator:
 
         self.node.listen("POWER_RAD", self.set_power)
 
-        self.node.ui.add_button("power_button", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
-                                order=0)
-        self.node.ui.add_button("power_button2", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
-                                order=0)
-        self.node.ui.add_button("power_button3", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
+        self.node.ui.add_button("power_button", text="Power: Off", topic="POWER_RAD", data=True, button_class="btn-danger",
                                 order=0)
 
-        self.node.ui.add_break("some_break", order=50)
-
-        self.node.ui.add_text("happyness", "I am happy")
         self.node.ui.update()
-
-        self.node.listen("increment_lamp", self.lamp_activity)
-
-    def lamp_activity(self, _):
-        self.set_power({"data": True})
 
     def set_power(self, msg):
 
-        if msg["data"] == True:
-            self.power = True
-            self.node.ui.get("happyness")["text"] = "I am happy"
+        if msg["data"] != self.power:
+
+            self.power = msg["data"]
 
             pb = self.node.ui.get("power_button")
-            pb["text"] = "Power: On"
-            pb["data"] = False
-            pb["button_class"] = "btn-success"
+
+            pb["text"] = "Power: On" if self.power else "Power: Off"
+            pb["button_class"] = "btn-success" if self.power else "btn-danger"
+            pb["data"] = not self.power
 
             self.node.ui.update()
 
-        elif msg["data"] == False:
-            self.power = False
-            self.node.ui.get("happyness")["text"] = "I am sad"
+    def run(self):
 
-            pb = self.node.ui.get("power_button")
-            pb["text"] = "Power: Off"
-            pb["data"] = True
-            pb["button_class"] = "btn-danger"
-
-            self.node.ui.update()
+        while self.node.running:
+            time.sleep(1)
+            if self.power:
+                self.node.broadcast("HEAT", data=True)
 
 
 if __name__ == "__main__":
 
-    import time
+    r = Radiator()
 
-    radiator = Radiator()
-
-    while radiator.node.running:
-        time.sleep(10)
-        radiator.set_power({"data": False})
+    r.run()

@@ -26,11 +26,17 @@ class Bootstrap:
 
     def launch_file(self, msg):
         file_name = msg["data"]
-        file_location = self.root_dir + "/" + file_name
-        i = [self.python_interpreter, file_location, "&"]
-        logging.info("Launching %s" % file_location)
-        self.running_processes[file_name] = subprocess.Popen(i)
+        if file_name not in self.running_processes:
 
+            file_location = self.root_dir + "/" + file_name
+            i = [self.python_interpreter, file_location, "&"]
+            logging.info("Launching %s" % file_location)
+            self.running_processes[file_name] = subprocess.Popen(i)
+        else:
+            logging.info("%s Is already running, stopping" % file_name)
+            self.running_processes[file_name].terminate()
+            del self.running_processes[file_name]
+            self.launch_file(msg)
 
 if __name__ == "__main__":
 
@@ -45,4 +51,4 @@ if __name__ == "__main__":
     web_thread = threading.Thread(target=web.app.run)
     web_thread.start()
 
-    b = Bootstrap(["example_nodes/radiator.py"])
+    b = Bootstrap(["example_nodes/cat.py", "example_nodes/room.py", "example_nodes/radiator.py"])
