@@ -70,6 +70,8 @@ def broadcast():
 def root():
     return render_template('index.html')
 
+def run_locally():
+    app.run(host="0.0.0.0")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    run_locally()

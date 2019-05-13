@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     from CostumePy import web
 
-    web_thread = threading.Thread(target=web.app.run)
+    web_thread = threading.Thread(target=web.run_locally)
     web_thread.start()
 
     b = Bootstrap(["example_nodes/cat.py", "example_nodes/room.py", "example_nodes/radiator.py"])
