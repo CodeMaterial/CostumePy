@@ -1,5 +1,4 @@
 from CostumePy.cospy_manager import CospyManager
-from CostumePy.UI import Button
 import CostumePy
 import threading
 import time
@@ -21,7 +20,9 @@ class Bootstrap:
         self.node_names = node_names
 
         for node_name in self.node_names:
-            self.node.ui.add_elements(Button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name))
+            self.node.ui.add_button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name)
+
+        self.node.ui.update()
 
     def launch_file(self, msg):
         file_name = msg["data"]

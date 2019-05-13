@@ -1,8 +1,5 @@
 import CostumePy
 
-from CostumePy.UI import Button, Text
-
-
 class Radiator:
 
     def __init__(self):
@@ -13,22 +10,46 @@ class Radiator:
 
         self.node.listen("POWER_RAD", self.set_power)
 
-        self.on_button = Button("power_button", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger")
-        self.off_button = Button("power_button", "Power: On", "POWER_RAD", data=False, button_class="btn-success")
+        self.node.ui.add_button("power_button", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
+                                order=0)
+        self.node.ui.add_button("power_button2", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
+                                order=0)
+        self.node.ui.add_button("power_button3", "Power: Off", "POWER_RAD", data=True, button_class="btn-danger",
+                                order=0)
 
-        self.node.ui.add_elements(self.on_button, Text("happyness", "I am happy"))
+        self.node.ui.add_break("some_break", order=50)
+
+        self.node.ui.add_text("happyness", "I am happy")
+        self.node.ui.update()
+
+        self.node.listen("increment_lamp", self.lamp_activity)
+
+    def lamp_activity(self, _):
+        self.set_power({"data": True})
 
     def set_power(self, msg):
 
         if msg["data"] == True:
             self.power = True
-            self.node.ui.elements["happyness"].text = "I am happy"
-            self.node.ui.replace("power_button", self.off_button)
+            self.node.ui.get("happyness")["text"] = "I am happy"
+
+            pb = self.node.ui.get("power_button")
+            pb["text"] = "Power: On"
+            pb["data"] = False
+            pb["button_class"] = "btn-success"
+
+            self.node.ui.update()
 
         elif msg["data"] == False:
             self.power = False
-            self.node.ui.elements["happyness"].text = "I am sad"
-            self.node.ui.replace("power_button", self.on_button)
+            self.node.ui.get("happyness")["text"] = "I am sad"
+
+            pb = self.node.ui.get("power_button")
+            pb["text"] = "Power: Off"
+            pb["data"] = True
+            pb["button_class"] = "btn-danger"
+
+            self.node.ui.update()
 
 
 if __name__ == "__main__":

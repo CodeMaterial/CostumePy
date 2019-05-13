@@ -53,14 +53,19 @@ const app = new Vue({
                     </span>
                 </div>
                 <div class="panel-body">
-                  <div v-for="(ui_element, ui_element_name) in nodes[node_name]">
-                    <button v-if="ui_element.type=='Button'" v-bind:disabled="!nodes[node_name].running" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
+                  <span v-for="(ui_element, ui_element_name) in nodes[node_name]">
+                    <button v-if="ui_element.type=='Button'" v-bind:disabled="!nodes[node_name].running" class="btn" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element.text}}
                     </button>
-                    <p v-if="ui_element.type=='Text'" v-bind:class="ui_element.text_class">
-                        {{ui_element.text}}
-                    </p>
-                  </div>  
+                    
+                    <div v-if="ui_element.type=='Text'" v-bind:class="ui_element.text_class" class="panel panel-default">
+                        <div class="panel-body">
+                            {{ui_element.text}}
+                        </div>
+                    </div>
+                    
+                    <hr v-if="ui_element.type=='Break'"/>
+                  </span>
                 </div>
               </div>
           </div>

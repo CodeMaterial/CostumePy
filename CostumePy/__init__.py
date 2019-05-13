@@ -2,7 +2,6 @@ import sys
 import time
 import logging
 from CostumePy.cospy_node import CospyNode
-from CostumePy.UI import Button
 
 
 nodes = []
@@ -58,13 +57,6 @@ def quit():
     global nodes
     for node in nodes:
         node.quit()
-
-
-def add_button(name, topic, data=None):
-
-    button = Button(name, topic, data=data)
-
-    get_node().ui.add_elements(button)
 
 
 def add_state(name, topic):

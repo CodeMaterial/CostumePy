@@ -66,7 +66,7 @@ class CospyNode:
 
     def quit(self):
         self.running = False
-        self.ui._update()
+        self.ui.update()
 
     def listen(self, topic, callback):
         logging.info("Setting up listening callbacks for %s" % topic)
