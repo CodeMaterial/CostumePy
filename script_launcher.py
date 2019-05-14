@@ -12,7 +12,7 @@ class Bootstrap:
 
     def __init__(self, node_names):
 
-        self.node = CostumePy.new_node("bootstrap")
+        self.node = CostumePy.new_node("script_launcher")
         self.running_processes = {}
         self.node.listen("launch", self.launch_file)
         self.python_interpreter = sys.executable
@@ -33,20 +33,23 @@ class Bootstrap:
             logging.info("Launching %s" % file_location)
             self.running_processes[file_name] = subprocess.Popen(i)
 
+            self.check()
+
         elif self.running_processes[file_name].poll() is not None:
             del self.running_processes[file_name]
             self.launch_file(msg)
+            self.check()
         else:
             logging.info("%s Is already running" % file_name)
 
     def check(self):
 
-        while self.node.running:
-            for filename in self.running_processes:
-                alive = self.running_processes[filename].poll() is not None
-                self.node.ui.get("launch_%s" % filename)["button_class"] = "btn " + "btn-default" if alive else "btn-success"
-            self.node.ui.update()
-            time.sleep(1)
+        for filename in self.running_processes:
+            alive = self.running_processes[filename].poll() is not None
+            self.node.ui.get("launch_%s" % filename)["button_class"] = "btn " + "btn-default" if alive else "btn-success"
+            self.node.ui.get("launch_%s" % filename)["enabled"] = alive
+        self.node.ui.update()
+
 
 if __name__ == "__main__":
 
@@ -61,5 +64,7 @@ if __name__ == "__main__":
     web_thread = threading.Thread(target=web.app.run, args=["0.0.0.0"])
     web_thread.start()
 
-    b = Bootstrap(["example_nodes/cat.py", "example_nodes/room.py", "example_nodes/radiator.py"])
-    b.check()
+    b = Bootstrap(sys.argv[1:])
+    while b.node.running:
+        time.sleep(2)
+        b.check()

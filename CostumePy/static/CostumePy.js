@@ -54,7 +54,7 @@ const app = new Vue({
                 </div>
                 <div class="panel-body">
                   <span v-for="(ui_element, ui_element_name) in nodes[node_name]">
-                    <button v-if="ui_element.type=='Button'" v-bind:disabled="!nodes[node_name].running" class="btn" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
+                    <button v-if="ui_element.type=='Button'" v-bind:disabled="!ui_element.enabled" class="btn" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element.text}}
                     </button>
                     
