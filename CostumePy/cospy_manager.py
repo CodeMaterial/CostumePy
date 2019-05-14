@@ -38,6 +38,7 @@ class CospyManager:
 
                 if node_name in self._node_sockets:
                     logging.error("Node already running %s" % node_name)
+                    self.request_socket.send_string("FAILED")
                     continue
 
                 address = "tcp://localhost:%i" % self.available_ip

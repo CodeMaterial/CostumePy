@@ -54,6 +54,9 @@ class CospyNode:
 
         ip_socket.close()
 
+        if ip_address == "FAILED":
+            raise ConnectionRefusedError("Manager contacted but refused to give communication address")
+
         return ip_address
 
     def check_kill(self, msg):

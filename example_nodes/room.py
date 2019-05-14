@@ -24,7 +24,32 @@ class Room:
         self.node.ui.elements["temp"]["text"] = "Current temperature: %i" % self.temperature
         self.node.ui.update()
 
+class Window:
+
+    def __init__(self):
+
+        self.node = CostumePy.new_node("window")
+        self.node.ui.add_button("open_window", text="Open Window", topic="TOGGLE_WINDOW")
+        self.node.ui.update()
+        self.node.listen("TOGGLE_WINDOW", self.toggle_window)
+
+        self.window_open = False
+
+    def toggle_window(self, msg):
+        self.window_open = not self.window_open
+        self.node.ui.get("open_window")["text"] = "Close Window" if self.window_open else "Open Window"
+        self.node.ui.update()
+
+    def loop(self):
+        while self.node.running:
+            if self.window_open:
+                self.node.broadcast("HEAT", data=False)
+            time.sleep(1)
 
 if __name__ == "__main__":
 
     r = Room()
+
+    w = Window()
+
+    w.loop()

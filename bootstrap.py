@@ -32,11 +32,21 @@ class Bootstrap:
             i = [self.python_interpreter, file_location, "&"]
             logging.info("Launching %s" % file_location)
             self.running_processes[file_name] = subprocess.Popen(i)
-        else:
-            logging.info("%s Is already running, stopping" % file_name)
-            self.running_processes[file_name].terminate()
+
+        elif self.running_processes[file_name].poll() is not None:
             del self.running_processes[file_name]
             self.launch_file(msg)
+        else:
+            logging.info("%s Is already running" % file_name)
+
+    def check(self):
+
+        while self.node.running:
+            for filename in self.running_processes:
+                alive = self.running_processes[filename].poll() is not None
+                self.node.ui.get("launch_%s" % filename)["button_class"] = "btn " + "btn-default" if alive else "btn-success"
+            self.node.ui.update()
+            time.sleep(1)
 
 if __name__ == "__main__":
 
@@ -52,3 +62,4 @@ if __name__ == "__main__":
     web_thread.start()
 
     b = Bootstrap(["example_nodes/cat.py", "example_nodes/room.py", "example_nodes/radiator.py"])
+    b.check()
