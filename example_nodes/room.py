@@ -12,7 +12,9 @@ class Room:
 
         self.node.listen("HEAT", self.heat)
 
-        self.node.ui.add_text("temp")
+        self.node.ui.add_text("temp", order=0)
+
+        self.node.ui.add_break("break", order=1)
 
         self.node.ui.add_button("fan_room", text="Fan Room", topic="HEAT", data=False)
 

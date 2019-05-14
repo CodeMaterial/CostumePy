@@ -50,10 +50,10 @@ const app = new Vue({
                     <span v-else class="badge badge-danger float-right">
                         Shutting Down ...
                     </span>
-                    <h2>{{node_name}}</h2>
+                    <h2 class="text-capitalize">{{node_name}}</h2>
                 </div>
                 <div class="card-body">
-                  <span v-for="(ui_element, ui_element_name) in nodes[node_name]">
+                  <span v-for="(ui_element, ui_element_name) in nodes[node_name].elements">
                     <button v-if="ui_element.type=='Button'" v-bind:disabled="!ui_element.enabled" class="btn" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element.text}}
                     </button>

@@ -9,11 +9,12 @@ class UI:
 
     def update(self):
         state = {}
+        state["elements"] = {}
         for element_id in self.elements:
             new_id = "%02i_%s" % (self.elements[element_id]["order"], element_id)
-            state[new_id] = self.elements[element_id]
+            state["elements"][new_id] = self.elements[element_id]
             if not self.node.running:
-                state[new_id]["enabled"] = False
+                state["elements"][new_id]["enabled"] = False
 
         state["running"] = self.node.running  # Wait this shouldn't work... This will be interpreted as a node by the web framework
         self.node.broadcast("_UI_UPDATE", data=state)

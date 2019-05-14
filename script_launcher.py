@@ -19,8 +19,9 @@ class Bootstrap:
         self.root_dir, _ = os.path.split(os.path.abspath(__file__))
         self.node_names = node_names
 
-        for node_name in self.node_names:
-            self.node.ui.add_button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name)
+        for i, node_name in enumerate(self.node_names):
+            self.node.ui.add_button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name, order=i*2)
+            self.node.ui.add_break("break_%s" % node_name, order=i*2+1)
 
         self.node.ui.update()
 
