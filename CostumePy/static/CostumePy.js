@@ -39,20 +39,20 @@ const app = new Vue({
         }
     },
   template: `
-    <div class="container-fluid">
+    <div class="container-fluid" style="padding-top: 15px;">
       <div v-for="row in grid_names" class="row">
           <div v-for="node_name in row" class="col-sm-4">
-              <div class="panel panel-primary">
-                <div class="panel-heading">
-                    {{node_name}}
-                    <button v-if="nodes[node_name].running" class="pull-right close" type="button" v-on:click="on_click('_kill', node_name)">
+              <div class="card ">
+                <div class="card-header">
+                    <button v-if="nodes[node_name].running" class="float-right close" type="button" v-on:click="on_click('_kill', node_name)">
                         &times;
                     </button>
-                    <span v-else class="pull-right badge">
+                    <span v-else class="badge badge-danger float-right">
                         Shutting Down ...
                     </span>
+                    <h2>{{node_name}}</h2>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                   <span v-for="(ui_element, ui_element_name) in nodes[node_name]">
                     <button v-if="ui_element.type=='Button'" v-bind:disabled="!ui_element.enabled" class="btn" v-bind:class="ui_element.button_class" type="button" v-on:click="on_click(ui_element.topic, ui_element.data)">
                         {{ui_element.text}}
@@ -60,7 +60,7 @@ const app = new Vue({
                     
                     <div v-if="ui_element.type=='Text'" v-bind:class="ui_element.text_class" class="panel panel-default">
                         <div class="panel-body">
-                            {{ui_element.text}}
+                            <p class="lead">{{ui_element.text}}</p>
                         </div>
                     </div>
                     

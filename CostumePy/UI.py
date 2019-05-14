@@ -10,8 +10,10 @@ class UI:
     def update(self):
         state = {}
         for element_id in self.elements:
-            o = self.elements[element_id]["order"]
-            state["%02i_%s" % (o, element_id)] = self.elements[element_id]
+            new_id = "%02i_%s" % (self.elements[element_id]["order"], element_id)
+            state[new_id] = self.elements[element_id]
+            if not self.node.running:
+                state[new_id]["enabled"] = False
 
         state["running"] = self.node.running  # Wait this shouldn't work... This will be interpreted as a node by the web framework
         self.node.broadcast("_UI_UPDATE", data=state)
@@ -25,7 +27,7 @@ class UI:
 
     def add_button(self, element_id, text="Not Defined", topic=None, data=None, button_class="btn btn-default", order=99):
         if element_id not in self.elements:
-            self.elements[element_id] = {"type": "Button", "text": text, "topic": topic, "data": data, "button_class": button_class, "order": order}
+            self.elements[element_id] = {"type": "Button", "text": text, "topic": topic, "data": data, "button_class": button_class, "order": order, "enabled": True}
         else:
             logging.error("Cannot create new UI element with id %s because it already exists" % element_id)
         return NotImplemented
