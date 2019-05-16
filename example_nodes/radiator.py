@@ -34,9 +34,9 @@ class Radiator:
     def run(self):
 
         while self.node.running:
-            time.sleep(1)
             if self.power:
                 self.node.broadcast("HEAT", data=True)
+            time.sleep(1)
 
 
 if __name__ == "__main__":

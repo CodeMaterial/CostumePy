@@ -26,10 +26,10 @@ def update_ui(msg):
     update_pending = True
 
 
-CostumePy.set_node_name("UI")
+node = CostumePy.new_node("UI")
 
-CostumePy.listen("_UI_UPDATE", update_ui)
-CostumePy.listen("death", death)
+node.listen("_UI_UPDATE", update_ui)
+node.listen("death", death)
 
 app = Flask(__name__)
 
@@ -59,9 +59,9 @@ def broadcast():
         data = request.form['data']
 
     if data is None:
-        CostumePy.broadcast(topic)
+        node.broadcast(topic)
     else:
-        CostumePy.broadcast(topic, data=data)
+        node.broadcast(topic, data=data)
 
     return "Done", 200, {'Content-Type': 'text/plain'}
 

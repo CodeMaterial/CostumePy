@@ -16,7 +16,7 @@ class UI:
             if not self.node.running:
                 state["elements"][new_id]["enabled"] = False
 
-        state["running"] = self.node.running  # Wait this shouldn't work... This will be interpreted as a node by the web framework
+        state["running"] = self.node.running
         self.node.broadcast("_UI_UPDATE", data=state)
 
     def add_text(self, element_id, text="None", text_class="", order=99):

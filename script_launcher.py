@@ -10,18 +10,17 @@ import logging
 
 class Bootstrap:
 
-    def __init__(self, node_names):
+    def __init__(self, script_names):
 
         self.node = CostumePy.new_node("script_launcher")
         self.running_processes = {}
         self.node.listen("launch", self.launch_file)
         self.python_interpreter = sys.executable
         self.root_dir, _ = os.path.split(os.path.abspath(__file__))
-        self.node_names = node_names
 
-        for i, node_name in enumerate(self.node_names):
-            self.node.ui.add_button("launch_%s" % node_name, "Launch %s" % node_name, "launch", data=node_name, order=i*2)
-            self.node.ui.add_break("break_%s" % node_name, order=i*2+1)
+        for i, script_name in enumerate(script_names):
+            self.node.ui.add_button("launch_%s" % script_name, script_name, "launch", data=script_name, order=i*2)
+            self.node.ui.add_break("break_%s" % script_name, order=i*2+1)
 
         self.node.ui.update()
 

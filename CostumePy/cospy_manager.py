@@ -12,7 +12,6 @@ class CospyManager:
         self._node_sockets = {}
         self._listeners = {}
         self.running = True
-        CostumePy.set_logging_level(logging.DEBUG)
         self._manager_listeners = {"_listen_for": self.register_listener}
         self.backlog = deque()
 
