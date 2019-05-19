@@ -107,7 +107,10 @@ class CospyNode:
                 if msg["topic"] in self.listening_to:
                     callbacks = self.listening_to[msg["topic"]]
                     for callback in callbacks:
-                        callback(msg)
+                        try:
+                            callback(msg)
+                        except Exception as e:
+                            logging.error("Bad callback: %r" % e)
 
             except zmq.Again:
                 pass

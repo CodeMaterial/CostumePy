@@ -16,7 +16,7 @@ class Bootstrap:
         self.running_processes = {}
         self.node.listen("launch", self.launch_file)
         self.python_interpreter = sys.executable
-        self.root_dir, _ = os.path.split(os.path.abspath(__file__))
+        self.root_dir = os.getcwd()
 
         for i, script_name in enumerate(script_names):
             self.node.ui.add_button("launch_%s" % script_name, script_name, "launch", data=script_name, order=i*2)
@@ -31,7 +31,7 @@ class Bootstrap:
             file_location = self.root_dir + "/" + file_name
             i = [self.python_interpreter, file_location, "&"]
             logging.info("Launching %s" % file_location)
-            self.running_processes[file_name] = subprocess.Popen(i)
+            self.running_processes[file_name] = subprocess.Popen(i, cwd=self.root_dir)
 
             self.check()
 
