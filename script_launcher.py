@@ -46,7 +46,7 @@ class Bootstrap:
 
         for filename in self.running_processes:
             alive = self.running_processes[filename].poll() is not None
-            self.node.ui.get("launch_%s" % filename)["button_class"] = "btn " + "btn-default" if alive else "btn-success"
+            self.node.ui.get("launch_%s" % filename)["button_class"] = "btn-default" if alive else "btn-success"
             self.node.ui.get("launch_%s" % filename)["enabled"] = alive
         self.node.ui.update()
 
